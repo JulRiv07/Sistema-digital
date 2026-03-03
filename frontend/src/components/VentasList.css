@@ -1,23 +1,40 @@
 .ventas-container {
     display: flex;
-    color: black;
     flex-direction: column;
     gap: 12px;
+    color: black;
 }
 
 .ventas-title {
     background-color: #eec3c3;
-    padding: 10px 15px;
+    padding: 12px 15px;
     border-radius: 12px;
     font-weight: bold;
+}
+
+.filtros {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.filtros select {
+    padding: 8px 12px;
+    color: black;
+    border-radius: 10px;
+    border: 1px solid #d8a9a9;
+    background-color: #f7e4e4;
+    font-size: 14px;
 }
 
 .venta-card {
     background-color: #f7e4e4;
     padding: 15px;
     border-radius: 15px;
-    box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0px 5px 12px rgba(0,0,0,0.08);
     transition: 0.2s ease;
+
+    
 }
 
 .venta-card:hover {
@@ -34,39 +51,51 @@
     color: #5a3e3e;
 }
 
-.venta-descripcion {
-    margin-top: 6px;
-    font-size: 14px;
-    color: #7a5c5c;
-}
-
-.venta-tipo {
-    margin-top: 6px;
-    font-size: 12px;
-    background-color: #eec3c3;
-    padding: 4px 8px;
-    border-radius: 8px;
-    display: inline-block;
-}
-
-.filtros {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.filtros select {
-    padding: 8px;
-    border-radius: 10px;
-    color: black;
-    border: 1px solid #d8a9a9;
-    background-color: #f7e4e4;
-}
-
 .venta-extra {
     margin-top: 8px;
     display: flex;
     justify-content: space-between;
     font-size: 12px;
     color: #7a5c5c;
+}
+
+.venta-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+}
+
+.btn-edit {
+    background-color: #d8a9a9;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    
+}
+
+.btn-delete {
+    background-color: #b00020;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-form input,
+.modal-form select {
+    padding: 5px;
+    color: black;
+    border-radius: 10px;
+    border: 1px solid #d8a9a9;
+    background-color: #f7e4e4;
 }

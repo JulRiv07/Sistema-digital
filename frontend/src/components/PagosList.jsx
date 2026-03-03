@@ -5,22 +5,35 @@ import Modal from "./Modal";
 
 function PagosList() {
 
+    const hoy = new Date();
+
     const [pagos, setPagos] = useState([]);
+    const [mes, setMes] = useState(hoy.getMonth() + 1);
+    const [año, setAño] = useState(hoy.getFullYear());
+
     const [modalOpen, setModalOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [selectedPago, setSelectedPago] = useState(null);
-
     const [monto, setMonto] = useState("");
 
     const cargarPagos = () => {
-        axios.get("http://localhost:8000/pagos")
+        axios.get(`http://localhost:8000/pagos?mes=${mes}&año=${año}`)
         .then(res => setPagos(res.data))
         .catch(err => console.error(err));
     };
 
     useEffect(() => {
         cargarPagos();
-    }, []);
+    }, [mes, año]);
+
+    const formatearFecha = (fechaISO) => {
+        const fecha = new Date(fechaISO);
+        return fecha.toLocaleDateString("es-CO", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+    };
 
     const eliminarPago = async () => {
         await axios.delete(`http://localhost:8000/pagos/${selectedPago.id}`);
@@ -30,8 +43,8 @@ function PagosList() {
 
     const actualizarPago = async () => {
         await axios.put(`http://localhost:8000/pagos/${selectedPago.id}`, {
-        cliente_id: selectedPago.cliente_id,
-        monto: Number(monto)
+            cliente_id: selectedPago.cliente_id,
+            monto: Number(monto)
         });
         cerrarModal();
         cargarPagos();
@@ -59,50 +72,71 @@ function PagosList() {
     return (
         <div className="pagos-container">
 
-        <div className="pagos-title">Pagos Registrados</div>
+            <div className="pagos-title">Pagos Registrados</div>
 
-        {pagos.map(pago => (
-            <div key={pago.id} className="pago-card">
+            <div className="filtros">
+                <select value={mes} onChange={(e) => setMes(e.target.value)}>
+                    {Array.from({ length: 12 }, (_, i) => (
+                        <option key={i+1} value={i+1}>
+                            {new Date(0, i).toLocaleString('es-CO', { month: 'long' })}
+                        </option>
+                    ))}
+                </select>
 
-            <div className="pago-top">
-                <span>{pago.cliente_nombre}</span>
-                <span>$ {pago.monto}</span>
+                <select value={año} onChange={(e) => setAño(e.target.value)}>
+                    {[2024, 2025, 2026].map(a => (
+                        <option key={a} value={a}>{a}</option>
+                    ))}
+                </select>
             </div>
 
-            <div style={{ marginTop: "8px" }}>
-                <button className="btn-edit" onClick={() => abrirEditar(pago)}>
-                Editar
-                </button>
-
-                <button className="btn-delete" onClick={() => abrirEliminar(pago)}>
-                Eliminar
-                </button>
-            </div>
-
-            </div>
-        ))}
-
-        <Modal
-            isOpen={modalOpen}
-            title={editMode ? "Editar pago" : "Eliminar pago"}
-            onConfirm={editMode ? actualizarPago : eliminarPago}
-            onCancel={cerrarModal}
-        >
-            {editMode ? (
-            <>
-                <input
-                type="number"
-                value={monto}
-                onChange={(e) => setMonto(e.target.value)}
-                placeholder="Monto"
-                />
-            </>
-            ) : (
-            <p>
-                ¿Seguro que deseas eliminar este pago?
-            </p>
+            {pagos.length === 0 && (
+                <div>No hay pagos registrados en este mes</div>
             )}
-        </Modal>
+
+            {pagos.map(pago => (
+                <div key={pago.id} className="pago-card">
+
+                    <div className="pago-top">
+                        <span>{pago.cliente_nombre}</span>
+                        <span>$ {pago.monto}</span>
+                    </div>
+
+                    <div className="pago-fecha">
+                        {formatearFecha(pago.fecha)}
+                    </div>
+
+                    <div className="acciones">
+                        <button className="btn-edit" onClick={() => abrirEditar(pago)}>
+                            Editar
+                        </button>
+
+                        <button className="btn-delete" onClick={() => abrirEliminar(pago)}>
+                            Eliminar
+                        </button>
+                    </div>
+
+                </div>
+            ))}
+
+            <Modal
+                isOpen={modalOpen}
+                title={editMode ? "Editar pago" : "Eliminar pago"}
+                onConfirm={editMode ? actualizarPago : eliminarPago}
+                onCancel={cerrarModal}
+            >
+                {editMode ? (
+                    <input
+                        type="number"
+                        value={monto}
+                        onChange={(e) => setMonto(e.target.value)}
+                        placeholder="Monto"
+                        className="modal-input"
+                    />
+                ) : (
+                    <p>¿Seguro que deseas eliminar este pago?</p>
+                )}
+            </Modal>
 
         </div>
     );

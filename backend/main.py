@@ -75,26 +75,23 @@ def crear_venta(venta: schemas.VentaCreate, db: Session = Depends(get_db)):
 from fastapi import Query
 
 @app.get("/ventas")
-def listar_ventas(
-    mes: int = Query(None),
-    año: int = Query(None),
-    db: Session = Depends(get_db)
-):
+def listar_ventas(mes: int = None, año: int = None, db: Session = Depends(get_db)):
 
     query = db.query(
         Venta.id,
         Venta.descripcion,
-        Venta.tipo_pago,
         Venta.total,
+        Venta.tipo_pago,
         Venta.fecha,
+        Venta.cliente_id,
         Cliente.nombre.label("cliente_nombre")
-    ).join(Cliente, Venta.cliente_id == Cliente.id)
+    ).join(Cliente)
 
-    if mes:
-        query = query.filter(func.extract("month", Venta.fecha) == mes)
-
-    if año:
-        query = query.filter(func.extract("year", Venta.fecha) == año)
+    if mes and año:
+        query = query.filter(
+            func.extract("month", Venta.fecha) == mes,
+            func.extract("year", Venta.fecha) == año
+        )
 
     ventas = query.order_by(Venta.fecha.desc()).all()
 
@@ -102,9 +99,10 @@ def listar_ventas(
         {
             "id": v.id,
             "descripcion": v.descripcion,
-            "tipo_pago": v.tipo_pago,
             "total": v.total,
+            "tipo_pago": v.tipo_pago,
             "fecha": v.fecha,
+            "cliente_id": v.cliente_id,
             "cliente_nombre": v.cliente_nombre
         }
         for v in ventas
@@ -365,7 +363,7 @@ def eliminar_cliente(cliente_id: int, db: Session = Depends(get_db)):
     return {"mensaje": "Cliente eliminado"}
 
 @app.put("/ventas/{venta_id}")
-def editar_venta(venta_id: int, datos: schemas.VentaCreate, db: Session = Depends(get_db)):
+def editar_venta(venta_id: int, datos: schemas.VentaUpdate, db: Session = Depends(get_db)):
 
     venta = db.query(Venta).filter(Venta.id == venta_id).first()
 

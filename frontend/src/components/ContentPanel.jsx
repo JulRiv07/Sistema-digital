@@ -7,6 +7,7 @@ import ClientesPanel from "./ClientesPanel";
 import VentasList from "./VentasList";
 import PagosList from "./PagosList";
 import GastosList from "./GastosList";
+import VentasList from "./VentasList";
 
 function ContentPanel({
   activeSection,

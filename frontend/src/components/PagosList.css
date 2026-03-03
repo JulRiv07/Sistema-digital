@@ -90,3 +90,38 @@
 .btn-edit:active {
     transform: scale(0.95);
 }
+
+.pago-fecha {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #7a5c5c;
+}
+
+.acciones {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+}
+
+.filtros {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.filtros select {
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid #d8a9a9;
+    background-color: #f7e4e4;
+    color: black;
+}
+
+.modal-input {
+    width: 100%;
+    color: black;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid #d8a9a9;
+    background-color: #f7e4e4;
+}

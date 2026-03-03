@@ -17,3 +17,9 @@ class PagoCreate(BaseModel):
 class GastoCreate(BaseModel):
     descripcion: str
     monto: float
+
+class VentaUpdate(BaseModel):
+    descripcion: str
+    tipo_pago: str
+    total: float
+    cliente_id: int
