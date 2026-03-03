@@ -1,0 +1,50 @@
+/* Contenedor general de formularios */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Labels */
+.form-container label {
+  font-size: 15px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background-color: #eec3c3;
+}
+
+/* Inputs y selects */
+.form-container input,
+.form-container select {
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #d8a9a9;
+  background-color: #f7e4e4;
+  color: black;
+  font-size: 14px;
+  outline: none;
+}
+
+/* Focus */
+.form-container input:focus,
+.form-container select:focus {
+  border-color: #c98b8b;
+}
+
+/* Botón principal */
+.form-container button {
+  margin-top: 10px;
+  padding: 12px;
+  background-color: #c98b8b;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  transition: 0.2s ease;
+}
+
+.form-container button:hover {
+    background-color: #b67979;
+}

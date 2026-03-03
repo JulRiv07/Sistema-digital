@@ -1,0 +1,31 @@
+h3{
+    background-color: #f7e4e4;
+    padding: 5px 15px;
+    font-size: 15px;
+    color: black;
+    border-radius: 10px;
+}
+
+.deuda-card {
+    color: black;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f7e4e4;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+.deuda-card button {
+    background-color: #c98b8b;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+}
+
+.deuda-card button:hover {
+    background-color: #b67979;
+}

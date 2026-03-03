@@ -1,0 +1,27 @@
+.main-area {
+  background-color: #edd6d6;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 40px;
+  padding: 40px 60px;
+}
+
+.dashboard-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-area {
+  flex: 1;
+  display: flex;
+  gap: 30px;
+  padding: 30px 60px;
+}
+
+@media (max-width: 768px) {
+  .main-area {
+    flex-direction: column;
+    padding: 20px;
+  }
+}

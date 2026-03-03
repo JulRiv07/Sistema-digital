@@ -1,0 +1,72 @@
+.ventas-container {
+    display: flex;
+    color: black;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ventas-title {
+    background-color: #eec3c3;
+    padding: 10px 15px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+.venta-card {
+    background-color: #f7e4e4;
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.08);
+    transition: 0.2s ease;
+}
+
+.venta-card:hover {
+    transform: translateY(-3px);
+}
+
+.venta-top {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+}
+
+.venta-total {
+    color: #5a3e3e;
+}
+
+.venta-descripcion {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #7a5c5c;
+}
+
+.venta-tipo {
+    margin-top: 6px;
+    font-size: 12px;
+    background-color: #eec3c3;
+    padding: 4px 8px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.filtros {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.filtros select {
+    padding: 8px;
+    border-radius: 10px;
+    color: black;
+    border: 1px solid #d8a9a9;
+    background-color: #f7e4e4;
+}
+
+.venta-extra {
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #7a5c5c;
+}

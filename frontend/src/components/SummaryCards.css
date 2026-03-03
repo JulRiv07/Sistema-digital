@@ -1,0 +1,22 @@
+.summary {
+  background-color: #e6c7c7;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 15px 10px;
+}
+
+.card {
+  background-color: #f0dddd;
+  color: black;
+  padding: 20px;
+  text-align: center;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .summary-card {
+    padding: 15px;
+  }
+}

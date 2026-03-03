@@ -1,0 +1,40 @@
+.clientes-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    
+}
+
+.clientes-title {
+    background-color: #eec3c3;
+    padding: 10px 15px;
+    border-radius: 12px;
+    font-weight: bold;
+    color: black;
+}
+
+.cliente-card {
+    background-color: #f7e4e4;
+    padding: 15px;
+    
+    border-radius: 15px;
+    box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.08);
+    transition: 0.2s ease;
+}
+
+.cliente-card:hover {
+    transform: translateY(-3px);
+}
+
+.cliente-nombre {
+    color: black;
+    font-weight: 600;
+    font-size: 16px;
+    color: #5a3e3e;
+}
+
+.cliente-telefono {
+    font-size: 14px;
+    color: #7a5c5c;
+    margin-top: 4px;
+}
