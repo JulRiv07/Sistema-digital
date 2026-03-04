@@ -1,11 +1,11 @@
-from models import Base, Cliente, Venta, Pago, Gasto
+from backend.models import Base, Cliente, Venta, Pago, Gasto
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Depends
-from database import engine, get_db
+from backend.database import engine, get_db
 from sqlalchemy.orm import Session
 from datetime import datetime
 from sqlalchemy import func
-import schemas
+import backend.schemas as schemas
 
 app = FastAPI()
 
