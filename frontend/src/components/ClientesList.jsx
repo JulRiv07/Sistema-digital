@@ -7,7 +7,7 @@ function ClientesList() {
     const [clientes, setClientes] = useState([]);
 
     useEffect(() => {
-        axios.get("http://localhost:8000/clientes")
+        axios.get("https://postres-juli.onrender.com/clientes")
         .then(res => setClientes(res.data))
         .catch(err => console.error(err));
     }, []);

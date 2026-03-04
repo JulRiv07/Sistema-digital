@@ -12,7 +12,7 @@ function VentaForm({ onVentaCreada }) {
 
     // Cargar clientes al abrir formulario
     useEffect(() => {
-        axios.get("http://127.0.0.1:8000/clientes")
+        axios.get("https://postres-juli.onrender.com/clientes")
         .then(res => setClientes(res.data))
         .catch(err => console.error("Error cargando clientes", err));
     }, []);
@@ -26,7 +26,7 @@ function VentaForm({ onVentaCreada }) {
         }
 
         try {
-        await axios.post("http://127.0.0.1:8000/ventas", {
+        await axios.post("https://postres-juli.onrender.com/ventas", {
             cliente_id: Number(clienteId),
             tipo_pago: tipoPago,
             descripcion: descripcion,

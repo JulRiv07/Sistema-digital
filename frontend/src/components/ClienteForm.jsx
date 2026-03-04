@@ -19,7 +19,7 @@ function ClienteForm({ onClienteCreado }) {
         }
 
         try {
-        await axios.post("http://localhost:8000/clientes", {
+        await axios.post("https://postres-juli.onrender.com/clientes", {
             nombre,
             telefono
         });

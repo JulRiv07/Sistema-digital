@@ -7,7 +7,7 @@ function DeudasPanel({ setSelectedCliente, setActiveSection }) {
     const [deudas, setDeudas] = useState([]);
 
     useEffect(() => {
-        axios.get("http://localhost:8000/deudas")
+        axios.get("https://postres-juli.onrender.com/deudas")
         .then(res => setDeudas(res.data))
         .catch(err => console.error(err));
     }, []);

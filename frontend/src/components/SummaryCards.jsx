@@ -12,7 +12,7 @@ function SummaryCards({ refreshKey }) {
   });
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/resumen")
+    axios.get("https://postres-juli.onrender.com/resumen")
       .then(res => {
         setResumen(res.data);
       })

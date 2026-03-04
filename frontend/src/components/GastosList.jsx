@@ -19,7 +19,7 @@ function GastosList() {
     const [monto, setMonto] = useState("");
 
     const cargarGastos = () => {
-        axios.get(`http://localhost:8000/gastos?mes=${mes}&año=${año}`)
+        axios.get(`https://postres-juli.onrender.com/gastos?mes=${mes}&año=${año}`)
         .then(res => setGastos(res.data))
         .catch(err => console.error(err));
     };
@@ -29,13 +29,13 @@ function GastosList() {
     }, [mes, año]);
 
     const eliminarGasto = async () => {
-        await axios.delete(`http://localhost:8000/gastos/${selectedGasto.id}`);
+        await axios.delete(`https://postres-juli.onrender.com/gastos/${selectedGasto.id}`);
         cerrarModal();
         cargarGastos();
     };
 
     const actualizarGasto = async () => {
-        await axios.put(`http://localhost:8000/gastos/${selectedGasto.id}`, {
+        await axios.put(`https://postres-juli.onrender.com/gastos/${selectedGasto.id}`, {
         descripcion,
         monto: Number(monto)
         });

@@ -15,7 +15,7 @@ function GastoForm({ onGastoCreado }) {
         }
 
         try {
-        await axios.post("http://localhost:8000/gastos", {
+        await axios.post("https://postres-juli.onrender.com/gastos", {
             descripcion: descripcion,
             monto: Number(monto)
         });
