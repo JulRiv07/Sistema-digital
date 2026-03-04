@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 from sqlalchemy.sql import func 
-from database import Base
+from backend.database import Base
 
 class Cliente(Base):
     __tablename__ = "clientes"
