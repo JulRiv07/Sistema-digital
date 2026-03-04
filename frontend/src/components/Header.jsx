@@ -2,6 +2,7 @@ import "./Header.css";
 import Logo from "../assets/Logo.png";
 
 function  Header() {
+    
     return (
         <header className = "header">
             <img src ={Logo} alt = "Logo" className = "header-logo" />

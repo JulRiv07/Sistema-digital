@@ -1,13 +1,18 @@
-from backend.models import Base, Cliente, Venta, Pago, Gasto
+from fastapi import FastAPI, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Depends
-from backend.database import engine, get_db
 from sqlalchemy.orm import Session
-from datetime import datetime
 from sqlalchemy import func
+from datetime import datetime
+
+from backend.models import Base, Cliente, Venta, Pago, Gasto
+from backend.database import engine, get_db
 import backend.schemas as schemas
 
-app = FastAPI()
+
+app = FastAPI(
+    docs_url=None,
+    redoc_url=None
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,6 +23,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 Base.metadata.create_all(bind = engine)
 
