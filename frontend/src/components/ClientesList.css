@@ -38,3 +38,30 @@
     color: #7a5c5c;
     margin-top: 4px;
 }
+
+.cliente-card{
+    background:#f7e4e4;
+    padding:15px;
+    border-radius:12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.cliente-info{
+    display:flex;
+    flex-direction:column;
+}
+
+.btn-delete{
+    background:#d9534f;
+    border:none;
+    color:white;
+    padding:6px 12px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.btn-delete:hover{
+    background:#c9302c;
+}
