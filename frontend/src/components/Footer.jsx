@@ -4,7 +4,9 @@ import Logo from "../assets/Logo.png";
 function Footer() {
   return (
     <footer className="footer">
-      <p>© {new Date().getFullYear()} Postres Juli - Sistema de Gestión</p>
+      <p>© JRS <br/> {new Date().getFullYear()} Postres Juli - Sistema de Gestión <br/> Te amo ma ❤️ </p>
+      
+      
     </footer>
   );
 }
