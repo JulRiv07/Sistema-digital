@@ -1,5 +1,6 @@
 import "./SummaryCards.css";
 import { useEffect, useState } from "react";
+import { fmtCurrency } from "C:\Users\julia\Postres_Juli\frontend\src\services\format.js";
 import axios from "axios";
 
 function SummaryCards({ refreshKey }) {
@@ -24,22 +25,20 @@ function SummaryCards({ refreshKey }) {
   return (
     <section className="summary">
       <div className="card">
-        Vendido mes actual: $ {resumen.vendido}
+        Vendido mes actual: {fmtCurrency(resumen.vendido)}
       </div>
-
       <div className="card">
-        Gastos mes actual: $ {resumen.gastos}
+        Gastos mes actual: {fmtCurrency(resumen.gastos)}
       </div>
-
       <div className="card">
-        Pendiente mes actual: $ {resumen.pendiente}
+        Pendiente mes actual: {fmtCurrency(resumen.pendiente)}
       </div>
-
       <div className="card">
-        Ganancia mes actual: $ {resumen.ganancia}
+        Ganancia mes actual: {fmtCurrency(resumen.ganancia)}
       </div>
     </section>
   );
 }
+
 
 export default SummaryCards;
