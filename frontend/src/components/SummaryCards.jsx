@@ -1,6 +1,6 @@
 import "./SummaryCards.css";
 import { useEffect, useState } from "react";
-import { fmtCurrency } from "C:\Users\julia\Postres_Juli\frontend\src\services\format.js";
+import { fmtCurrency } from "../services/format";
 import axios from "axios";
 
 function SummaryCards({ refreshKey }) {
