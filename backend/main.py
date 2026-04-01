@@ -458,3 +458,7 @@ def eliminar_gasto(gasto_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {"mensaje": "Gasto eliminado"}
+
+@app.api_route("/health", methods=["GET", "HEAD"])
+def health():
+    return {"status": "ok"}
