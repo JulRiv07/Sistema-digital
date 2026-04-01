@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import datetime
-
+from fastapi import Request
 from backend.models import Base, Cliente, Venta, Pago, Gasto
 from backend.database import engine, get_db
 import backend.schemas as schemas
@@ -459,6 +459,7 @@ def eliminar_gasto(gasto_id: int, db: Session = Depends(get_db)):
 
     return {"mensaje": "Gasto eliminado"}
 
+
 @app.api_route("/health", methods=["GET", "HEAD"])
-def health():
+def health(request: Request):
     return {"status": "ok"}
