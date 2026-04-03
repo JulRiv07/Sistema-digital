@@ -76,17 +76,17 @@ function PagosList() {
 
             <div className="filtros">
                 <select value={mes} onChange={(e) => setMes(e.target.value)}>
-                    {Array.from({ length: 12 }, (_, i) => (
-                        <option key={i+1} value={i+1}>
-                            {new Date(0, i).toLocaleString('es-CO', { month: 'long' })}
-                        </option>
-                    ))}
+                {Array.from({ length: 12 }, (_, i) => (
+                    <option key={i+1} value={i+1}>
+                    {new Date(0, i).toLocaleString("es-CO", { month: "long" })}
+                    </option>
+                ))}
                 </select>
 
                 <select value={año} onChange={(e) => setAño(e.target.value)}>
-                    {[2024, 2025, 2026].map(a => (
-                        <option key={a} value={a}>{a}</option>
-                    ))}
+                {[2024, 2025, 2026].map(a => (
+                    <option key={a} value={a}>{a}</option>
+                ))}
                 </select>
             </div>
 
