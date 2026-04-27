@@ -175,7 +175,7 @@ def listar_pagos(db: Session = Depends(get_db)):
             "id": p.id,
             "monto": p.monto,
             "fecha": p.fecha,
-            "cliente_id": p.cliente_id,   # 🔥 AQUI
+            "cliente_id": p.cliente_id, 
             "cliente_nombre": p.cliente_nombre
         }
         for p in pagos
@@ -197,10 +197,13 @@ def crear_gasto(gasto: schemas.GastoCreate, db: Session = Depends(get_db)):
 
 from fastapi import Query
 
+from fastapi import Query
+from sqlalchemy import func
+
 @app.get("/gastos")
 def listar_gastos(
     mes: int = Query(None),
-    año: int = Query(None),
+    anio: int = Query(None),
     db: Session = Depends(get_db)
 ):
 
@@ -211,11 +214,11 @@ def listar_gastos(
         Gasto.fecha
     )
 
-    if mes:
+    if mes is not None:
         query = query.filter(func.extract("month", Gasto.fecha) == mes)
 
-    if año:
-        query = query.filter(func.extract("year", Gasto.fecha) == año)
+    if anio is not None:
+        query = query.filter(func.extract("year", Gasto.fecha) == anio)
 
     gastos = query.order_by(Gasto.fecha.desc()).all()
 
