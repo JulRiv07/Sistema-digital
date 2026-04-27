@@ -9,7 +9,7 @@ function PagosList() {
 
     const [pagos, setPagos] = useState([]);
     const [mes, setMes] = useState(hoy.getMonth() + 1);
-    const [año, setAño] = useState(hoy.getFullYear());
+    const [anio, setAnio] = useState(hoy.getFullYear());
 
     const [modalOpen, setModalOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
@@ -17,14 +17,14 @@ function PagosList() {
     const [monto, setMonto] = useState("");
 
     const cargarPagos = () => {
-        axios.get(`https://postres-juli.onrender.com/pagos?mes=${mes}&año=${año}`)
+        axios.get(`https://postres-juli.onrender.com/pagos?mes=${mes}&anio=${anio}`)
         .then(res => setPagos(res.data))
         .catch(err => console.error(err));
     };
 
     useEffect(() => {
         cargarPagos();
-    }, [mes, año]);
+    }, [mes, anio]);
 
     const formatearFecha = (fechaISO) => {
         const fecha = new Date(fechaISO);
@@ -75,7 +75,7 @@ function PagosList() {
             <div className="pagos-title">Pagos Registrados</div>
 
             <div className="filtros">
-                <select value={mes} onChange={(e) => setMes(e.target.value)}>
+                <select value={mes} onChange={(e) => setMes(Number(e.target.value))}>
                 {Array.from({ length: 12 }, (_, i) => (
                     <option key={i+1} value={i+1}>
                     {new Date(0, i).toLocaleString("es-CO", { month: "long" })}
@@ -83,7 +83,7 @@ function PagosList() {
                 ))}
                 </select>
 
-                <select value={año} onChange={(e) => setAño(e.target.value)}>
+                <select value={anio} onChange={(e) => setAnio(Number(e.target.value))}>
                 {[2024, 2025, 2026].map(a => (
                     <option key={a} value={a}>{a}</option>
                 ))}
