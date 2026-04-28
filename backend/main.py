@@ -7,6 +7,7 @@ from fastapi import Request
 from backend.models import Base, Cliente, Venta, Pago, Gasto
 from backend.database import engine, get_db
 import backend.schemas as schemas
+from sqlalchemy import extract
 
 
 app = FastAPI(
@@ -160,22 +161,34 @@ def registrar_pago(pago: schemas.PagoCreate, db: Session = Depends(get_db)):
     return nuevo_pago
 
 @app.get("/pagos")
-def listar_pagos(db: Session = Depends(get_db)):
+def listar_pagos(
+    mes: int = Query(None),
+    anio: int = Query(None),
+    db: Session = Depends(get_db)
+):
 
-    pagos = db.query(
+    query = db.query(
         Pago.id,
         Pago.monto,
         Pago.fecha,
         Pago.cliente_id,
         Cliente.nombre.label("cliente_nombre")
-    ).join(Cliente).all()
+    ).join(Cliente)
+
+    if mes is not None and anio is not None:
+        query = query.filter(
+            extract("month", Pago.fecha) == mes,
+            extract("year", Pago.fecha) == anio
+        )
+
+    pagos = query.order_by(Pago.fecha.desc()).all()
 
     return [
         {
             "id": p.id,
             "monto": p.monto,
             "fecha": p.fecha,
-            "cliente_id": p.cliente_id, 
+            "cliente_id": p.cliente_id,
             "cliente_nombre": p.cliente_nombre
         }
         for p in pagos
