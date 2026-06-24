@@ -13,7 +13,7 @@ function SummaryCards({ refreshKey }) {
   });
 
   useEffect(() => {
-    axios.get("https://postres-juli.onrender.com/resumen")
+    axios.get("/resumen")
       .then(res => {
         setResumen(res.data);
       })

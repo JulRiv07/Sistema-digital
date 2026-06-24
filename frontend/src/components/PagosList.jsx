@@ -17,7 +17,7 @@ function PagosList() {
     const [monto, setMonto] = useState("");
 
     const cargarPagos = () => {
-        axios.get(`https://postres-juli.onrender.com/pagos?mes=${mes}&anio=${anio}`)
+        axios.get(`/pagos?mes=${mes}&anio=${anio}`)
         .then(res => setPagos(res.data))
         .catch(err => console.error(err));
     };
@@ -36,13 +36,13 @@ function PagosList() {
     };
 
     const eliminarPago = async () => {
-        await axios.delete(`https://postres-juli.onrender.com/pagos/${selectedPago.id}`);
+        await axios.delete(`/pagos/${selectedPago.id}`);
         cerrarModal();
         cargarPagos();
     };
 
     const actualizarPago = async () => {
-        await axios.put(`https://postres-juli.onrender.com/pagos/${selectedPago.id}`, {
+        await axios.put(`/pagos/${selectedPago.id}`, {
             cliente_id: selectedPago.cliente_id,
             monto: Number(monto)
         });

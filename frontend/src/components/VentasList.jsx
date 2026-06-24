@@ -23,13 +23,13 @@ function VentasList() {
     const [clienteId, setClienteId] = useState("");
 
     const cargarVentas = () => {
-        axios.get(`https://postres-juli.onrender.com/ventas?mes=${mes}&año=${año}`)
+        axios.get(`/ventas?mes=${mes}&año=${año}`)
         .then(res => setVentas(res.data))
         .catch(err => console.error(err));
     };
 
     const cargarClientes = () => {
-        axios.get("https://postres-juli.onrender.com/clientes")
+        axios.get("/clientes")
         .then(res => setClientes(res.data))
         .catch(err => console.error(err));
     };
@@ -75,7 +75,7 @@ function VentasList() {
             });
 
             await axios.put(
-            `https://postres-juli.onrender.com/ventas/${selectedVenta.id}`,
+            `/ventas/${selectedVenta.id}`,
             {
                 descripcion: descripcion.trim(),
                 total: parseFloat(total),
@@ -95,7 +95,7 @@ function VentasList() {
 
     const eliminarVenta = async () => {
         await axios.delete(
-        `https://postres-juli.onrender.com/ventas/${selectedVenta.id}`
+        `/ventas/${selectedVenta.id}`
         );
 
         cerrarModal();

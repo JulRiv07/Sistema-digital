@@ -1,0 +1,17 @@
+# Secretos / entorno
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/.env.local
+
+# Sistema
+.DS_Store

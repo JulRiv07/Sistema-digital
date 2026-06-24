@@ -1,43 +1,69 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
-from sqlalchemy.sql import func 
+from sqlalchemy.sql import func
 from backend.database import Base
+
+
+class Empresa(Base):
+    __tablename__ = "empresas"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String, nullable=False)
+    creado_en = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class Usuario(Base):
+    __tablename__ = "usuarios"
+
+    id = Column(Integer, primary_key=True, index=True)
+    empresa_id = Column(Integer, ForeignKey("empresas.id"), nullable=False)
+    nombre = Column(String, nullable=False)
+    email = Column(String, nullable=False, unique=True, index=True)
+    password_hash = Column(String, nullable=False)
+    rol = Column(String, nullable=False, server_default="admin")
+    creado_en = Column(DateTime(timezone=True), server_default=func.now())
+
 
 class Cliente(Base):
     __tablename__ = "clientes"
 
-    id = Column(Integer, primary_key = True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
+    empresa_id = Column(Integer, ForeignKey("empresas.id"), nullable=False)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
     nombre = Column(String, nullable=False)
     telefono = Column(String)
-    creado_en = Column(DateTime(timezone=True), server_default = func.now())
+    creado_en = Column(DateTime(timezone=True), server_default=func.now())
+
 
 class Venta(Base):
     __tablename__ = "ventas"
 
     id = Column(Integer, primary_key=True, index=True)
+    empresa_id = Column(Integer, ForeignKey("empresas.id"), nullable=False)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
     cliente_id = Column(Integer, ForeignKey("clientes.id"))
     fecha = Column(DateTime(timezone=True), server_default=func.now())
     tipo_pago = Column(String, nullable=False)
     descripcion = Column(String, nullable=False)
     total = Column(Float, nullable=False)
 
+
 class Pago(Base):
     __tablename__ = "Pagos"
 
-    id = Column(Integer, primary_key=True, index = True)
+    id = Column(Integer, primary_key=True, index=True)
+    empresa_id = Column(Integer, ForeignKey("empresas.id"), nullable=False)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
     cliente_id = Column(Integer, ForeignKey("clientes.id"))
-    fecha = Column(DateTime(timezone=True), server_default= func.now())
+    fecha = Column(DateTime(timezone=True), server_default=func.now())
     monto = Column(Float, nullable=False)
+
 
 class Gasto(Base):
     __tablename__ = "gastos"
 
-    id = Column(Integer, primary_key= True, index=True)
-    fecha = Column(DateTime(timezone=True), server_default= func.now())
+    id = Column(Integer, primary_key=True, index=True)
+    empresa_id = Column(Integer, ForeignKey("empresas.id"), nullable=False)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    fecha = Column(DateTime(timezone=True), server_default=func.now())
     descripcion = Column(String, nullable=False)
     monto = Column(Float, nullable=False)
-
-
-
-
-
-

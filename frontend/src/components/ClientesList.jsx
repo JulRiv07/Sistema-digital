@@ -10,7 +10,7 @@ function ClientesList() {
     const [selectedCliente, setSelectedCliente] = useState(null);
 
     const cargarClientes = () => {
-        axios.get("https://postres-juli.onrender.com/clientes")
+        axios.get("/clientes")
         .then(res => setClientes(res.data))
         .catch(err => console.error(err));
     };
@@ -29,7 +29,7 @@ function ClientesList() {
         try {
 
             await axios.delete(
-                `https://postres-juli.onrender.com/clientes/${selectedCliente.id}`
+                `/clientes/${selectedCliente.id}`
             );
 
             cerrarModal();

@@ -12,7 +12,7 @@ function PagoForm({ selectedCliente, onPagoCreado }) {
 
     // 🔹 Cargar clientes al montar
     useEffect(() => {
-        axios.get("https://postres-juli.onrender.com/clientes")
+        axios.get("/clientes")
         .then(res => setClientes(res.data))
         .catch(err => console.error(err));
     }, []);
@@ -29,7 +29,7 @@ function PagoForm({ selectedCliente, onPagoCreado }) {
         return;
         }
 
-        axios.get(`https://postres-juli.onrender.com/clientes/${clienteId}/deuda`)
+        axios.get(`/clientes/${clienteId}/deuda`)
         .then(res => setDeuda(res.data.deuda_actual))
         .catch(err => console.error(err));
 
@@ -52,17 +52,17 @@ function PagoForm({ selectedCliente, onPagoCreado }) {
 
         try {
 
-        await axios.post("https://postres-juli.onrender.com/pagos", {
+        await axios.post("/pagos", {
             cliente_id: Number(clienteId),
             monto: Number(monto)
         });
 
-        setToast({ message: "Pago registrado correctamente 🎉", type: "success" });
+        setToast({ message: "Pago registrado correctamente", type: "success" });
         setTimeout(() => setToast(null), 3000);
 
         setMonto("");
 
-        axios.get(`https://postres-juli.onrender.com/clientes/${clienteId}/deuda`)
+        axios.get(`/clientes/${clienteId}/deuda`)
             .then(res => setDeuda(res.data.deuda_actual));
 
         if (onPagoCreado) {

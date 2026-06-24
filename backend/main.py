@@ -1,13 +1,13 @@
-from fastapi import FastAPI, Depends, Query
+from fastapi import FastAPI, Depends, Query, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, extract
 from datetime import datetime
-from fastapi import Request
-from backend.models import Base, Cliente, Venta, Pago, Gasto
+
+from backend.models import Base, Empresa, Usuario, Cliente, Venta, Pago, Gasto
 from backend.database import engine, get_db
 import backend.schemas as schemas
-from sqlalchemy import extract
+from backend.auth import hash_password, verify_password, crear_token, get_usuario_actual
 
 
 app = FastAPI(
@@ -18,7 +18,9 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://sistema-digital-red.vercel.app"
+        "https://sistema-digital-red.vercel.app",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -26,66 +28,138 @@ app.add_middleware(
 )
 
 
-Base.metadata.create_all(bind = engine)
+Base.metadata.create_all(bind=engine)
+
 
 @app.get("/")
 def inicio():
-    return {" Mensaje " : "Backend Funcionando"}
+    return {"Mensaje": "Backend Funcionando"}
+
+
+# ===================== AUTENTICACIÓN =====================
+
+@app.post("/registro", response_model=schemas.TokenResponse)
+def registro(datos: schemas.RegistroRequest, db: Session = Depends(get_db)):
+
+    existe = db.query(Usuario).filter(Usuario.email == datos.email).first()
+    if existe:
+        raise HTTPException(status_code=400, detail="Ese correo ya está registrado")
+
+    # 1) Crear la empresa
+    empresa = Empresa(nombre=datos.empresa_nombre)
+    db.add(empresa)
+    db.commit()
+    db.refresh(empresa)
+
+    # 2) Crear el usuario admin de esa empresa
+    usuario = Usuario(
+        empresa_id=empresa.id,
+        nombre=datos.nombre,
+        email=datos.email,
+        password_hash=hash_password(datos.password),
+        rol="admin",
+    )
+    db.add(usuario)
+    db.commit()
+    db.refresh(usuario)
+
+    token = crear_token(usuario)
+    return {"access_token": token, "token_type": "bearer", "usuario": usuario}
+
+
+@app.post("/login", response_model=schemas.TokenResponse)
+def login(datos: schemas.LoginRequest, db: Session = Depends(get_db)):
+
+    usuario = db.query(Usuario).filter(Usuario.email == datos.email).first()
+
+    if not usuario or not verify_password(datos.password, usuario.password_hash):
+        raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos")
+
+    token = crear_token(usuario)
+    return {"access_token": token, "token_type": "bearer", "usuario": usuario}
+
+
+@app.get("/me", response_model=schemas.UsuarioOut)
+def me(usuario: Usuario = Depends(get_usuario_actual)):
+    return usuario
+
+
+# ===================== CLIENTES =====================
 
 @app.post("/clientes")
-def crear_clientes(cliente: schemas.ClienteCreate, db: Session = Depends(get_db)):
+def crear_clientes(
+    cliente: schemas.ClienteCreate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
     nuevo_cliente = Cliente(
-        nombre = cliente.nombre, 
-        telefono = cliente.telefono
+        empresa_id=usuario.empresa_id,
+        usuario_id=usuario.id,
+        nombre=cliente.nombre,
+        telefono=cliente.telefono,
     )
-
     db.add(nuevo_cliente)
     db.commit()
     db.refresh(nuevo_cliente)
-
     return nuevo_cliente
 
+
 @app.get("/clientes")
-def listar_clientes(db: Session = Depends(get_db)):
-    clientes = db.query(Cliente).all()
-    return clientes
+def listar_clientes(
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    return db.query(Cliente).filter(Cliente.empresa_id == usuario.empresa_id).all()
+
+
+# ===================== VENTAS =====================
 
 @app.post("/ventas")
-def crear_venta(venta: schemas.VentaCreate, db: Session = Depends(get_db)):
-
-    cliente = db.query(Cliente).filter(Cliente.id == venta.cliente_id).first()
+def crear_venta(
+    venta: schemas.VentaCreate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    cliente = db.query(Cliente).filter(
+        Cliente.id == venta.cliente_id,
+        Cliente.empresa_id == usuario.empresa_id,
+    ).first()
 
     if not cliente:
-        return {"error": "Cliente no existe"}
+        raise HTTPException(status_code=404, detail="Cliente no existe")
 
     nueva_venta = Venta(
+        empresa_id=usuario.empresa_id,
+        usuario_id=usuario.id,
         cliente_id=venta.cliente_id,
         tipo_pago=venta.tipo_pago.lower(),
         descripcion=venta.descripcion,
-        total=venta.total
+        total=venta.total,
     )
-
     db.add(nueva_venta)
     db.commit()
     db.refresh(nueva_venta)
 
     if venta.tipo_pago.lower() == "contado":
-
         nuevo_pago = Pago(
+            empresa_id=usuario.empresa_id,
+            usuario_id=usuario.id,
             cliente_id=venta.cliente_id,
-            monto=venta.total
+            monto=venta.total,
         )
-
         db.add(nuevo_pago)
         db.commit()
-        
+
     return nueva_venta
 
-from fastapi import Query
 
 @app.get("/ventas")
-def listar_ventas(mes: int = None, año: int = None, db: Session = Depends(get_db)):
-
+def listar_ventas(
+    mes: int = None,
+    año: int = None,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
     query = db.query(
         Venta.id,
         Venta.descripcion,
@@ -93,13 +167,13 @@ def listar_ventas(mes: int = None, año: int = None, db: Session = Depends(get_d
         Venta.tipo_pago,
         Venta.fecha,
         Venta.cliente_id,
-        Cliente.nombre.label("cliente_nombre")
-    ).join(Cliente)
+        Cliente.nombre.label("cliente_nombre"),
+    ).join(Cliente).filter(Venta.empresa_id == usuario.empresa_id)
 
     if mes and año:
         query = query.filter(
             func.extract("month", Venta.fecha) == mes,
-            func.extract("year", Venta.fecha) == año
+            func.extract("year", Venta.fecha) == año,
         )
 
     ventas = query.order_by(Venta.fecha.desc()).all()
@@ -112,73 +186,93 @@ def listar_ventas(mes: int = None, año: int = None, db: Session = Depends(get_d
             "tipo_pago": v.tipo_pago,
             "fecha": v.fecha,
             "cliente_id": v.cliente_id,
-            "cliente_nombre": v.cliente_nombre
+            "cliente_nombre": v.cliente_nombre,
         }
         for v in ventas
     ]
 
+
 @app.get("/clientes/{cliente_id}/deuda")
-def calcular_deuda(cliente_id: int, db: Session = Depends(get_db)):
-    
-    cliente = db.query(Cliente).filter(Cliente.id == cliente_id).first()
+def calcular_deuda(
+    cliente_id: int,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    cliente = db.query(Cliente).filter(
+        Cliente.id == cliente_id,
+        Cliente.empresa_id == usuario.empresa_id,
+    ).first()
 
     if not cliente:
-        return{"Error": "Cliente no existe"}
-    
-    total_ventas = db.query(func.sum(Venta.total))\
-        .filter(Venta.cliente_id == cliente_id)\
-        .scalar() or 0
-    
-    total_pagos = db.query(func.sum(Pago.monto)) \
-        .filter(Pago.cliente_id == cliente_id) \
-        .scalar() or 0
-    
+        raise HTTPException(status_code=404, detail="Cliente no existe")
+
+    total_ventas = db.query(func.sum(Venta.total)).filter(
+        Venta.cliente_id == cliente_id,
+        Venta.empresa_id == usuario.empresa_id,
+    ).scalar() or 0
+
+    total_pagos = db.query(func.sum(Pago.monto)).filter(
+        Pago.cliente_id == cliente_id,
+        Pago.empresa_id == usuario.empresa_id,
+    ).scalar() or 0
+
     deuda = total_ventas - total_pagos
 
     return {
         "cliente": cliente.nombre,
         "total_ventas": total_ventas,
         "total_pagos": total_pagos,
-        "deuda_actual": deuda
+        "deuda_actual": deuda,
     }
 
+
+# ===================== PAGOS =====================
+
 @app.post("/pagos")
-def registrar_pago(pago: schemas.PagoCreate, db: Session = Depends(get_db)):
-    cliente = db.query(Cliente).filter(Cliente.id == pago.cliente_id).first()
+def registrar_pago(
+    pago: schemas.PagoCreate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    cliente = db.query(Cliente).filter(
+        Cliente.id == pago.cliente_id,
+        Cliente.empresa_id == usuario.empresa_id,
+    ).first()
 
     if not cliente:
-        return {"error" : "Cliente no existe"}
-    
-    nuevo_pago = Pago(
-        cliente_id = pago.cliente_id,
-        monto = pago.monto
-    )
+        raise HTTPException(status_code=404, detail="Cliente no existe")
 
+    nuevo_pago = Pago(
+        empresa_id=usuario.empresa_id,
+        usuario_id=usuario.id,
+        cliente_id=pago.cliente_id,
+        monto=pago.monto,
+    )
     db.add(nuevo_pago)
     db.commit()
     db.refresh(nuevo_pago)
-
     return nuevo_pago
+
 
 @app.get("/pagos")
 def listar_pagos(
     mes: int = Query(None),
     anio: int = Query(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
 ):
-
     query = db.query(
         Pago.id,
         Pago.monto,
         Pago.fecha,
         Pago.cliente_id,
-        Cliente.nombre.label("cliente_nombre")
-    ).join(Cliente)
+        Cliente.nombre.label("cliente_nombre"),
+    ).join(Cliente).filter(Pago.empresa_id == usuario.empresa_id)
 
     if mes is not None and anio is not None:
         query = query.filter(
             extract("month", Pago.fecha) == mes,
-            extract("year", Pago.fecha) == anio
+            extract("year", Pago.fecha) == anio,
         )
 
     pagos = query.order_by(Pago.fecha.desc()).all()
@@ -189,49 +283,51 @@ def listar_pagos(
             "monto": p.monto,
             "fecha": p.fecha,
             "cliente_id": p.cliente_id,
-            "cliente_nombre": p.cliente_nombre
+            "cliente_nombre": p.cliente_nombre,
         }
         for p in pagos
     ]
 
+
+# ===================== GASTOS =====================
+
 @app.post("/gastos")
-def crear_gasto(gasto: schemas.GastoCreate, db: Session = Depends(get_db)):
-
+def crear_gasto(
+    gasto: schemas.GastoCreate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
     nuevo_gasto = Gasto(
+        empresa_id=usuario.empresa_id,
+        usuario_id=usuario.id,
         descripcion=gasto.descripcion,
-        monto=gasto.monto
+        monto=gasto.monto,
     )
-
     db.add(nuevo_gasto)
     db.commit()
     db.refresh(nuevo_gasto)
-
     return nuevo_gasto
 
-from fastapi import Query
-
-from fastapi import Query
-from sqlalchemy import func
 
 @app.get("/gastos")
 def listar_gastos(
     mes: int = Query(None),
-    anio: int = Query(None),
-    db: Session = Depends(get_db)
+    año: int = Query(None),
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
 ):
-
     query = db.query(
         Gasto.id,
         Gasto.descripcion,
         Gasto.monto,
-        Gasto.fecha
-    )
+        Gasto.fecha,
+    ).filter(Gasto.empresa_id == usuario.empresa_id)
 
     if mes is not None:
         query = query.filter(func.extract("month", Gasto.fecha) == mes)
 
-    if anio is not None:
-        query = query.filter(func.extract("year", Gasto.fecha) == anio)
+    if año is not None:
+        query = query.filter(func.extract("year", Gasto.fecha) == año)
 
     gastos = query.order_by(Gasto.fecha.desc()).all()
 
@@ -240,31 +336,41 @@ def listar_gastos(
             "id": g.id,
             "descripcion": g.descripcion,
             "monto": g.monto,
-            "fecha": g.fecha
+            "fecha": g.fecha,
         }
         for g in gastos
     ]
 
-@app.get("/clientes/{cliente_id}/estado")
-def estado_cliente(cliente_id: int, db: Session = Depends(get_db)):
 
-    cliente = db.query(Cliente).filter(Cliente.id == cliente_id).first()
+@app.get("/clientes/{cliente_id}/estado")
+def estado_cliente(
+    cliente_id: int,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    cliente = db.query(Cliente).filter(
+        Cliente.id == cliente_id,
+        Cliente.empresa_id == usuario.empresa_id,
+    ).first()
 
     if not cliente:
-        return {"error" : "Cliente no existe"}
-    
-    ventas = db.query(Venta) \
-        .filter(Venta.cliente_id == cliente_id) \
-        .all()
-    
-    total_ventas = db.query(func.sum(Venta.total)) \
-        .filter(Venta.cliente_id == cliente_id) \
-        .scalar() or 0
-    
-    total_pagos = db.query(func.sum(Pago.monto)) \
-        .filter(Pago.cliente_id == cliente_id) \
-        .scalar() or 0
-    
+        raise HTTPException(status_code=404, detail="Cliente no existe")
+
+    ventas = db.query(Venta).filter(
+        Venta.cliente_id == cliente_id,
+        Venta.empresa_id == usuario.empresa_id,
+    ).all()
+
+    total_ventas = db.query(func.sum(Venta.total)).filter(
+        Venta.cliente_id == cliente_id,
+        Venta.empresa_id == usuario.empresa_id,
+    ).scalar() or 0
+
+    total_pagos = db.query(func.sum(Pago.monto)).filter(
+        Pago.cliente_id == cliente_id,
+        Pago.empresa_id == usuario.empresa_id,
+    ).scalar() or 0
+
     deuda = total_ventas - total_pagos
 
     ventas_detalle = [
@@ -272,44 +378,50 @@ def estado_cliente(cliente_id: int, db: Session = Depends(get_db)):
             "Descripcion": v.descripcion,
             "Tipo_pago": v.tipo_pago,
             "Total": v.total,
-            "Fecha": v.fecha
+            "Fecha": v.fecha,
         }
         for v in ventas
     ]
 
     return {
-        "Cliente" : cliente.nombre,
-        "Ventas" : ventas_detalle,
+        "Cliente": cliente.nombre,
+        "Ventas": ventas_detalle,
         "Total_ventas": total_ventas,
         "Total_pagos": total_pagos,
-        "Deuda_actual": deuda
+        "Deuda_actual": deuda,
     }
 
-    
 
 @app.get("/resumen")
-def resumen_general(db: Session = Depends(get_db)):
+def resumen_general(
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
     ahora = datetime.now()
     mes_actual = ahora.month
     año_actual = ahora.year
+    emp = usuario.empresa_id
 
-    ventas_mes = db.query(func.sum(Venta.total)) \
-        .filter(func.extract("month", Venta.fecha) == mes_actual)\
-        .filter(func.extract("year", Venta.fecha) == año_actual)\
-        .scalar() or 0
+    ventas_mes = db.query(func.sum(Venta.total)).filter(
+        Venta.empresa_id == emp,
+        func.extract("month", Venta.fecha) == mes_actual,
+        func.extract("year", Venta.fecha) == año_actual,
+    ).scalar() or 0
 
-    gastos_mes = db.query(func.sum(Gasto.monto))\
-        .filter(func.extract("month", Gasto.fecha) == mes_actual)\
-        .filter(func.extract("year", Gasto.fecha) == año_actual)\
-        .scalar() or 0
+    gastos_mes = db.query(func.sum(Gasto.monto)).filter(
+        Gasto.empresa_id == emp,
+        func.extract("month", Gasto.fecha) == mes_actual,
+        func.extract("year", Gasto.fecha) == año_actual,
+    ).scalar() or 0
 
-    pago_mes = db.query(func.sum(Pago.monto)) \
-        .filter(func.extract("month", Pago.fecha) == mes_actual)\
-        .filter(func.extract("year", Pago.fecha) == año_actual)\
-        .scalar() or 0
+    pago_mes = db.query(func.sum(Pago.monto)).filter(
+        Pago.empresa_id == emp,
+        func.extract("month", Pago.fecha) == mes_actual,
+        func.extract("year", Pago.fecha) == año_actual,
+    ).scalar() or 0
 
-    total_ventas = db.query(func.sum(Venta.total)).scalar() or 0
-    total_pagos = db.query(func.sum(Pago.monto)).scalar() or 0
+    total_ventas = db.query(func.sum(Venta.total)).filter(Venta.empresa_id == emp).scalar() or 0
+    total_pagos = db.query(func.sum(Pago.monto)).filter(Pago.empresa_id == emp).scalar() or 0
     pendiente_total = total_ventas - total_pagos
 
     ganancia_mes = pago_mes - gastos_mes
@@ -318,33 +430,39 @@ def resumen_general(db: Session = Depends(get_db)):
         "vendido": ventas_mes,
         "gastos": gastos_mes,
         "pendiente": pendiente_total,
-        "ganancia": ganancia_mes
+        "ganancia": ganancia_mes,
     }
 
+
 @app.get("/deudas")
-def listar_deudas(db: Session = Depends(get_db)):
+def listar_deudas(
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    emp = usuario.empresa_id
 
     sub_ventas = db.query(
         Venta.cliente_id,
-        func.sum(Venta.total).label("total_ventas")
-    ).group_by(Venta.cliente_id).subquery()
+        func.sum(Venta.total).label("total_ventas"),
+    ).filter(Venta.empresa_id == emp).group_by(Venta.cliente_id).subquery()
 
     sub_pagos = db.query(
         Pago.cliente_id,
-        func.sum(Pago.monto).label("total_pagos")
-    ).group_by(Pago.cliente_id).subquery()
+        func.sum(Pago.monto).label("total_pagos"),
+    ).filter(Pago.empresa_id == emp).group_by(Pago.cliente_id).subquery()
 
     resultado = db.query(
         Cliente.id,
         Cliente.nombre,
         sub_ventas.c.total_ventas,
         func.coalesce(sub_pagos.c.total_pagos, 0).label("total_pagos"),
-        (sub_ventas.c.total_ventas - func.coalesce(sub_pagos.c.total_pagos, 0)).label("deuda")
+        (sub_ventas.c.total_ventas - func.coalesce(sub_pagos.c.total_pagos, 0)).label("deuda"),
     )\
-    .join(sub_ventas, Cliente.id == sub_ventas.c.cliente_id)\
-    .outerjoin(sub_pagos, Cliente.id == sub_pagos.c.cliente_id)\
-    .filter((sub_ventas.c.total_ventas - func.coalesce(sub_pagos.c.total_pagos, 0)) > 0)\
-    .all()
+        .join(sub_ventas, Cliente.id == sub_ventas.c.cliente_id)\
+        .outerjoin(sub_pagos, Cliente.id == sub_pagos.c.cliente_id)\
+        .filter(Cliente.empresa_id == emp)\
+        .filter((sub_ventas.c.total_ventas - func.coalesce(sub_pagos.c.total_pagos, 0)) > 0)\
+        .all()
 
     return [
         {
@@ -352,127 +470,185 @@ def listar_deudas(db: Session = Depends(get_db)):
             "nombre": r.nombre,
             "total_ventas": r.total_ventas,
             "total_pagos": r.total_pagos,
-            "deuda": r.deuda
+            "deuda": r.deuda,
         }
         for r in resultado
     ]
 
-@app.put("/clientes/{cliente_id}")
-def editar_cliente(cliente_id: int, datos: schemas.ClienteCreate, db: Session = Depends(get_db)):
 
-    cliente = db.query(Cliente).filter(Cliente.id == cliente_id).first()
+# ===================== EDITAR / ELIMINAR =====================
+
+@app.put("/clientes/{cliente_id}")
+def editar_cliente(
+    cliente_id: int,
+    datos: schemas.ClienteCreate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    cliente = db.query(Cliente).filter(
+        Cliente.id == cliente_id,
+        Cliente.empresa_id == usuario.empresa_id,
+    ).first()
 
     if not cliente:
-        return {"error": "Cliente no existe"}
+        raise HTTPException(status_code=404, detail="Cliente no existe")
 
     cliente.nombre = datos.nombre
     cliente.telefono = datos.telefono
-
     db.commit()
     db.refresh(cliente)
-
     return cliente
 
-@app.delete("/clientes/{cliente_id}")
-def eliminar_cliente(cliente_id: int, db: Session = Depends(get_db)):
 
-    cliente = db.query(Cliente).filter(Cliente.id == cliente_id).first()
+@app.delete("/clientes/{cliente_id}")
+def eliminar_cliente(
+    cliente_id: int,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    cliente = db.query(Cliente).filter(
+        Cliente.id == cliente_id,
+        Cliente.empresa_id == usuario.empresa_id,
+    ).first()
 
     if not cliente:
-        return {"error": "Cliente no existe"}
+        raise HTTPException(status_code=404, detail="Cliente no existe")
 
     db.delete(cliente)
     db.commit()
-
     return {"mensaje": "Cliente eliminado"}
 
-@app.put("/ventas/{venta_id}")
-def editar_venta(venta_id: int, datos: schemas.VentaUpdate, db: Session = Depends(get_db)):
 
-    venta = db.query(Venta).filter(Venta.id == venta_id).first()
+@app.put("/ventas/{venta_id}")
+def editar_venta(
+    venta_id: int,
+    datos: schemas.VentaUpdate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    venta = db.query(Venta).filter(
+        Venta.id == venta_id,
+        Venta.empresa_id == usuario.empresa_id,
+    ).first()
 
     if not venta:
-        return {"error": "Venta no existe"}
+        raise HTTPException(status_code=404, detail="Venta no existe")
+
+    # El cliente nuevo también debe ser de la misma empresa
+    cliente = db.query(Cliente).filter(
+        Cliente.id == datos.cliente_id,
+        Cliente.empresa_id == usuario.empresa_id,
+    ).first()
+    if not cliente:
+        raise HTTPException(status_code=404, detail="Cliente no existe")
 
     venta.descripcion = datos.descripcion
     venta.tipo_pago = datos.tipo_pago.lower()
     venta.total = datos.total
     venta.cliente_id = datos.cliente_id
-
     db.commit()
     db.refresh(venta)
-
     return venta
 
-@app.delete("/ventas/{venta_id}")
-def eliminar_venta(venta_id: int, db: Session = Depends(get_db)):
 
-    venta = db.query(Venta).filter(Venta.id == venta_id).first()
+@app.delete("/ventas/{venta_id}")
+def eliminar_venta(
+    venta_id: int,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    venta = db.query(Venta).filter(
+        Venta.id == venta_id,
+        Venta.empresa_id == usuario.empresa_id,
+    ).first()
 
     if not venta:
-        return {"error": "Venta no existe"}
+        raise HTTPException(status_code=404, detail="Venta no existe")
 
     db.delete(venta)
     db.commit()
-
     return {"mensaje": "Venta eliminada"}
 
-@app.put("/pagos/{pago_id}")
-def editar_pago(pago_id: int, datos: schemas.PagoCreate, db: Session = Depends(get_db)):
 
-    pago = db.query(Pago).filter(Pago.id == pago_id).first()
+@app.put("/pagos/{pago_id}")
+def editar_pago(
+    pago_id: int,
+    datos: schemas.PagoCreate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    pago = db.query(Pago).filter(
+        Pago.id == pago_id,
+        Pago.empresa_id == usuario.empresa_id,
+    ).first()
 
     if not pago:
-        return {"error": "Pago no existe"}
+        raise HTTPException(status_code=404, detail="Pago no existe")
 
     pago.monto = datos.monto
     pago.cliente_id = datos.cliente_id
-
     db.commit()
     db.refresh(pago)
-
     return pago
 
-@app.delete("/pagos/{pago_id}")
-def eliminar_pago(pago_id: int, db: Session = Depends(get_db)):
 
-    pago = db.query(Pago).filter(Pago.id == pago_id).first()
+@app.delete("/pagos/{pago_id}")
+def eliminar_pago(
+    pago_id: int,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    pago = db.query(Pago).filter(
+        Pago.id == pago_id,
+        Pago.empresa_id == usuario.empresa_id,
+    ).first()
 
     if not pago:
-        return {"error": "Pago no existe"}
+        raise HTTPException(status_code=404, detail="Pago no existe")
 
     db.delete(pago)
     db.commit()
-
     return {"mensaje": "Pago eliminado"}
 
-@app.put("/gastos/{gasto_id}")
-def editar_gasto(gasto_id: int, datos: schemas.GastoCreate, db: Session = Depends(get_db)):
 
-    gasto = db.query(Gasto).filter(Gasto.id == gasto_id).first()
+@app.put("/gastos/{gasto_id}")
+def editar_gasto(
+    gasto_id: int,
+    datos: schemas.GastoCreate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    gasto = db.query(Gasto).filter(
+        Gasto.id == gasto_id,
+        Gasto.empresa_id == usuario.empresa_id,
+    ).first()
 
     if not gasto:
-        return {"error": "Gasto no existe"}
+        raise HTTPException(status_code=404, detail="Gasto no existe")
 
     gasto.descripcion = datos.descripcion
     gasto.monto = datos.monto
-
     db.commit()
     db.refresh(gasto)
-
     return gasto
 
-@app.delete("/gastos/{gasto_id}")
-def eliminar_gasto(gasto_id: int, db: Session = Depends(get_db)):
 
-    gasto = db.query(Gasto).filter(Gasto.id == gasto_id).first()
+@app.delete("/gastos/{gasto_id}")
+def eliminar_gasto(
+    gasto_id: int,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    gasto = db.query(Gasto).filter(
+        Gasto.id == gasto_id,
+        Gasto.empresa_id == usuario.empresa_id,
+    ).first()
 
     if not gasto:
-        return {"error": "Gasto no existe"}
+        raise HTTPException(status_code=404, detail="Gasto no existe")
 
     db.delete(gasto)
     db.commit()
-
     return {"mensaje": "Gasto eliminado"}
 
 

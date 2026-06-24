@@ -23,6 +23,32 @@
   cursor: pointer;
 }
 
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-username {
+  font-weight: 600;
+  color: #5a3a3a;
+}
+
+.header-logout {
+  background-color: #b67979;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.header-logout:hover {
+  background-color: #9c6464;
+}
+
 /* 📱 Mobile */
 @media (max-width: 768px) {
   .header {
