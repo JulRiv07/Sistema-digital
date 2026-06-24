@@ -49,6 +49,7 @@ class UsuarioOut(BaseModel):
     nombre: str
     email: str
     empresa_id: int
+    empresa_nombre: str | None = None
     rol: str
 
     class Config:

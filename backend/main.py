@@ -36,6 +36,19 @@ def inicio():
     return {"Mensaje": "Backend Funcionando"}
 
 
+def usuario_payload(usuario: Usuario, db: Session) -> dict:
+    """Arma la salida del usuario incluyendo el nombre de su empresa."""
+    empresa = db.query(Empresa).filter(Empresa.id == usuario.empresa_id).first()
+    return {
+        "id": usuario.id,
+        "nombre": usuario.nombre,
+        "email": usuario.email,
+        "empresa_id": usuario.empresa_id,
+        "empresa_nombre": empresa.nombre if empresa else None,
+        "rol": usuario.rol,
+    }
+
+
 # ===================== AUTENTICACIÓN =====================
 
 @app.post("/registro", response_model=schemas.TokenResponse)
@@ -64,7 +77,7 @@ def registro(datos: schemas.RegistroRequest, db: Session = Depends(get_db)):
     db.refresh(usuario)
 
     token = crear_token(usuario)
-    return {"access_token": token, "token_type": "bearer", "usuario": usuario}
+    return {"access_token": token, "token_type": "bearer", "usuario": usuario_payload(usuario, db)}
 
 
 @app.post("/login", response_model=schemas.TokenResponse)
@@ -76,12 +89,12 @@ def login(datos: schemas.LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos")
 
     token = crear_token(usuario)
-    return {"access_token": token, "token_type": "bearer", "usuario": usuario}
+    return {"access_token": token, "token_type": "bearer", "usuario": usuario_payload(usuario, db)}
 
 
 @app.get("/me", response_model=schemas.UsuarioOut)
-def me(usuario: Usuario = Depends(get_usuario_actual)):
-    return usuario
+def me(usuario: Usuario = Depends(get_usuario_actual), db: Session = Depends(get_db)):
+    return usuario_payload(usuario, db)
 
 
 # ===================== CLIENTES =====================

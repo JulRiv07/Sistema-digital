@@ -27,6 +27,15 @@
   margin-bottom: 6px;
 }
 
+.auth-brand {
+  margin: 0 0 14px;
+  color: #b67979;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
 .auth-title {
   margin: 4px 0 6px;
   color: #8a5a5a;

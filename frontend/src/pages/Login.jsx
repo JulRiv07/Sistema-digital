@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { login } from "../services/api";
-import Logo from "../assets/Logo.png";
 import "./Auth.css";
 
 function Login({ irARegistro }) {
@@ -35,9 +34,9 @@ function Login({ irARegistro }) {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <img src={Logo} alt="Postres Juli" className="auth-logo" />
+        <h1 className="auth-brand">Sistema Digital</h1>
         <h2 className="auth-title">Iniciar sesión</h2>
-        <p className="auth-subtitle">Bienvenida de nuevo 🍰</p>
+        <p className="auth-subtitle">Bienvenid@ de nuevo</p>
 
         <form className="form-container" onSubmit={handleSubmit}>
           <label>Correo</label>

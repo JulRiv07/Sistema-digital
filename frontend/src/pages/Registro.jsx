@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { registro } from "../services/api";
-import Logo from "../assets/Logo.png";
 import "./Auth.css";
 
 function Registro({ irALogin }) {
@@ -38,7 +37,7 @@ function Registro({ irALogin }) {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <img src={Logo} alt="Postres Juli" className="auth-logo" />
+        <h1 className="auth-brand">Sistema Digital</h1>
         <h2 className="auth-title">Crear empresa</h2>
         <p className="auth-subtitle">Registra tu negocio para empezar</p>
 

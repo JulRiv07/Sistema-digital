@@ -3,30 +3,38 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0px 60px;
-  
+  gap: 16px;
+  padding: 12px 40px;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
 }
 
 .header-logo {
-  width: 200px;
+  width: 80px;
+  height: auto;
+  flex-shrink: 0;
 }
 
 .header-title {
-  text-align: center;
-  font-size: 60px;
+  font-size: 38px;
   font-weight: bold;
   letter-spacing: 2px;
-}
-
-.menu-icon {
-  font-size: 30px;
-  cursor: pointer;
+  text-transform: uppercase;
+  color: #4a2f2f;
+  margin: 0;
+  line-height: 1.1;
 }
 
 .header-user {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .header-username {
@@ -43,6 +51,7 @@
   font-weight: bold;
   cursor: pointer;
   transition: 0.2s ease;
+  white-space: nowrap;
 }
 
 .header-logout:hover {
@@ -52,19 +61,29 @@
 /* 📱 Mobile */
 @media (max-width: 768px) {
   .header {
-    padding: 0px 30px;
+    padding: 10px 16px;
+    gap: 10px;
+  }
+
+  .header-brand {
     gap: 10px;
   }
 
   .header-logo {
-    width: 120px;
+    width: 50px;
   }
 
   .header-title {
-    font-size: 26px;
+    font-size: 21px;
+    letter-spacing: 1px;
   }
 
-  .menu-icon {
-    display: none;
+  .header-username {
+    font-size: 13px;
+  }
+
+  .header-logout {
+    padding: 7px 11px;
+    font-size: 13px;
   }
 }

@@ -2,13 +2,23 @@ import "./Header.css";
 import Logo from "../assets/Logo.png";
 import { useAuth } from "../context/AuthContext";
 
+// Empresa principal (la de tu mamá): solo esta muestra el logo de Postres Juli.
+const EMPRESA_PRINCIPAL = "Postres Juli";
+
 function Header() {
   const { usuario, cerrarSesion } = useAuth();
 
+  const empresaNombre = usuario?.empresa_nombre || "Sistema Digital";
+  const esPrincipal = empresaNombre === EMPRESA_PRINCIPAL;
+
   return (
     <header className="header">
-      <img src={Logo} alt="Logo" className="header-logo" />
-      <h1 className="header-title"> POSTRES JULI </h1>
+      <div className="header-brand">
+        {esPrincipal && (
+          <img src={Logo} alt="Logo" className="header-logo" />
+        )}
+        <h1 className="header-title">{empresaNombre}</h1>
+      </div>
 
       <div className="header-user">
         {usuario && <span className="header-username">{usuario.nombre}</span>}
