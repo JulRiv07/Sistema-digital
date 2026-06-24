@@ -3,11 +3,18 @@ import { useAuth } from "../context/AuthContext";
 import { registro } from "../services/api";
 import "./Auth.css";
 
+function passwordValida(p) {
+  return p.length >= 8 && /[A-Za-z]/.test(p) && /\d/.test(p);
+}
+
 function Registro({ irALogin }) {
   const { iniciarSesion } = useAuth();
 
+  const [tipo, setTipo] = useState("empresario"); // "empresario" | "usuario"
   const [empresaNombre, setEmpresaNombre] = useState("");
+  const [empresaCodigo, setEmpresaCodigo] = useState("");
   const [nombre, setNombre] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -17,14 +24,34 @@ function Registro({ irALogin }) {
     e.preventDefault();
     setError("");
 
-    if (!empresaNombre || !nombre || !email || !password) {
-      setError("Completa todos los campos");
+    if (!nombre || !username || !password) {
+      setError("Completa tu nombre, usuario y contraseña");
+      return;
+    }
+    if (tipo === "empresario" && !empresaNombre) {
+      setError("Escribe el nombre de tu empresa");
+      return;
+    }
+    if (tipo === "usuario" && !empresaCodigo) {
+      setError("Escribe el código de la empresa");
+      return;
+    }
+    if (!passwordValida(password)) {
+      setError("La contraseña debe tener mínimo 8 caracteres, con letras y números");
       return;
     }
 
     setCargando(true);
     try {
-      const data = await registro(empresaNombre, nombre, email, password);
+      const data = await registro({
+        tipo,
+        nombre,
+        username,
+        password,
+        email: email || null,
+        empresa_nombre: tipo === "empresario" ? empresaNombre : null,
+        empresa_codigo: tipo === "usuario" ? empresaCodigo : null,
+      });
       iniciarSesion(data.access_token, data.usuario);
     } catch (err) {
       const detalle = err.response?.data?.detail;
@@ -38,17 +65,53 @@ function Registro({ irALogin }) {
     <div className="auth-page">
       <div className="auth-card">
         <h1 className="auth-brand">Sistema Digital</h1>
-        <h2 className="auth-title">Crear empresa</h2>
-        <p className="auth-subtitle">Registra tu negocio para empezar</p>
+        <h2 className="auth-title">Crear cuenta</h2>
+
+        <div className="auth-toggle">
+          <button
+            type="button"
+            className={tipo === "empresario" ? "active" : ""}
+            onClick={() => setTipo("empresario")}
+          >
+            Soy empresario
+          </button>
+          <button
+            type="button"
+            className={tipo === "usuario" ? "active" : ""}
+            onClick={() => setTipo("usuario")}
+          >
+            Usuario de empresa
+          </button>
+        </div>
+
+        <p className="auth-subtitle">
+          {tipo === "empresario"
+            ? "Crea tu empresa y serás su administrador"
+            : "Únete a una empresa con su código"}
+        </p>
 
         <form className="form-container" onSubmit={handleSubmit}>
-          <label>Nombre de la empresa</label>
-          <input
-            type="text"
-            value={empresaNombre}
-            onChange={(e) => setEmpresaNombre(e.target.value)}
-            placeholder="Ej: Postres Juli"
-          />
+          {tipo === "empresario" ? (
+            <>
+              <label>Nombre de la empresa</label>
+              <input
+                type="text"
+                value={empresaNombre}
+                onChange={(e) => setEmpresaNombre(e.target.value)}
+                placeholder="Ej: Postres Juli"
+              />
+            </>
+          ) : (
+            <>
+              <label>Código de la empresa</label>
+              <input
+                type="text"
+                value={empresaCodigo}
+                onChange={(e) => setEmpresaCodigo(e.target.value)}
+                placeholder="Ej: A1B2C3D4"
+              />
+            </>
+          )}
 
           <label>Tu nombre</label>
           <input
@@ -58,7 +121,15 @@ function Registro({ irALogin }) {
             placeholder="Ej: Juliana"
           />
 
-          <label>Correo</label>
+          <label>Nombre de usuario</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Ej: juliana"
+          />
+
+          <label>Correo (opcional)</label>
           <input
             type="email"
             value={email}
@@ -73,6 +144,7 @@ function Registro({ irALogin }) {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
           />
+          <p className="auth-hint">Mínimo 8 caracteres, con letras y números.</p>
 
           {error && <p className="auth-error">{error}</p>}
 

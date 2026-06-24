@@ -8,6 +8,7 @@ class Empresa(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, nullable=False)
+    codigo = Column(String, nullable=False, unique=True, index=True)
     creado_en = Column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -17,7 +18,8 @@ class Usuario(Base):
     id = Column(Integer, primary_key=True, index=True)
     empresa_id = Column(Integer, ForeignKey("empresas.id"), nullable=False)
     nombre = Column(String, nullable=False)
-    email = Column(String, nullable=False, unique=True, index=True)
+    username = Column(String, nullable=False, unique=True, index=True)
+    email = Column(String, nullable=True, unique=True, index=True)
     password_hash = Column(String, nullable=False)
     rol = Column(String, nullable=False, server_default="admin")
     creado_en = Column(DateTime(timezone=True), server_default=func.now())

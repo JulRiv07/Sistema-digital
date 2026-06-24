@@ -6,7 +6,7 @@ import "./Auth.css";
 function Login({ irARegistro }) {
   const { iniciarSesion } = useAuth();
 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
@@ -15,17 +15,17 @@ function Login({ irARegistro }) {
     e.preventDefault();
     setError("");
 
-    if (!email || !password) {
+    if (!username || !password) {
       setError("Completa todos los campos");
       return;
     }
 
     setCargando(true);
     try {
-      const data = await login(email, password);
+      const data = await login(username, password);
       iniciarSesion(data.access_token, data.usuario);
     } catch (err) {
-      setError("Correo o contraseña incorrectos");
+      setError("Usuario o contraseña incorrectos");
     } finally {
       setCargando(false);
     }
@@ -39,12 +39,12 @@ function Login({ irARegistro }) {
         <p className="auth-subtitle">Bienvenid@ de nuevo</p>
 
         <form className="form-container" onSubmit={handleSubmit}>
-          <label>Correo</label>
+          <label>Usuario</label>
           <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="tucorreo@ejemplo.com"
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="tu nombre de usuario"
           />
 
           <label>Contraseña</label>

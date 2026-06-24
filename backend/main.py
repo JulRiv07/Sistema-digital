@@ -1,3 +1,7 @@
+import re
+import string
+import secrets
+
 from fastapi import FastAPI, Depends, Query, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -37,16 +41,35 @@ def inicio():
 
 
 def usuario_payload(usuario: Usuario, db: Session) -> dict:
-    """Arma la salida del usuario incluyendo el nombre de su empresa."""
+    """Arma la salida del usuario incluyendo datos de su empresa."""
     empresa = db.query(Empresa).filter(Empresa.id == usuario.empresa_id).first()
     return {
         "id": usuario.id,
         "nombre": usuario.nombre,
+        "username": usuario.username,
         "email": usuario.email,
         "empresa_id": usuario.empresa_id,
         "empresa_nombre": empresa.nombre if empresa else None,
+        "empresa_codigo": empresa.codigo if empresa else None,
         "rol": usuario.rol,
     }
+
+
+def validar_password(password: str):
+    """Reglas mínimas de seguridad para la contraseña."""
+    if len(password) < 8:
+        raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 8 caracteres")
+    if not re.search(r"[A-Za-z]", password) or not re.search(r"\d", password):
+        raise HTTPException(status_code=400, detail="La contraseña debe incluir letras y números")
+
+
+def generar_codigo_empresa(db: Session) -> str:
+    """Genera un código único de 8 caracteres para una empresa."""
+    alfabeto = string.ascii_uppercase + string.digits
+    while True:
+        codigo = "".join(secrets.choice(alfabeto) for _ in range(8))
+        if not db.query(Empresa).filter(Empresa.codigo == codigo).first():
+            return codigo
 
 
 # ===================== AUTENTICACIÓN =====================
@@ -54,23 +77,55 @@ def usuario_payload(usuario: Usuario, db: Session) -> dict:
 @app.post("/registro", response_model=schemas.TokenResponse)
 def registro(datos: schemas.RegistroRequest, db: Session = Depends(get_db)):
 
-    existe = db.query(Usuario).filter(Usuario.email == datos.email).first()
-    if existe:
-        raise HTTPException(status_code=400, detail="Ese correo ya está registrado")
+    tipo = (datos.tipo or "").strip().lower()
+    if tipo not in ("empresario", "usuario"):
+        raise HTTPException(status_code=400, detail="Tipo de registro inválido")
 
-    # 1) Crear la empresa
-    empresa = Empresa(nombre=datos.empresa_nombre)
-    db.add(empresa)
-    db.commit()
-    db.refresh(empresa)
+    # Reglas de seguridad de la contraseña
+    validar_password(datos.password)
 
-    # 2) Crear el usuario admin de esa empresa
+    # Validar nombre de usuario
+    username = (datos.username or "").strip().lower()
+    if len(username) < 3:
+        raise HTTPException(status_code=400, detail="El nombre de usuario debe tener al menos 3 caracteres")
+    if db.query(Usuario).filter(Usuario.username == username).first():
+        raise HTTPException(status_code=400, detail="Ese nombre de usuario ya está en uso")
+
+    # El correo es opcional, pero si lo dan, no puede repetirse
+    if datos.email:
+        if db.query(Usuario).filter(Usuario.email == datos.email).first():
+            raise HTTPException(status_code=400, detail="Ese correo ya está registrado")
+
+    if tipo == "empresario":
+        # Crea una empresa nueva y queda como admin
+        if not datos.empresa_nombre or not datos.empresa_nombre.strip():
+            raise HTTPException(status_code=400, detail="Falta el nombre de la empresa")
+        empresa = Empresa(
+            nombre=datos.empresa_nombre.strip(),
+            codigo=generar_codigo_empresa(db),
+        )
+        db.add(empresa)
+        db.commit()
+        db.refresh(empresa)
+        rol = "admin"
+    else:
+        # Se une a una empresa existente con el código
+        if not datos.empresa_codigo or not datos.empresa_codigo.strip():
+            raise HTTPException(status_code=400, detail="Falta el código de la empresa")
+        empresa = db.query(Empresa).filter(
+            Empresa.codigo == datos.empresa_codigo.strip().upper()
+        ).first()
+        if not empresa:
+            raise HTTPException(status_code=404, detail="No existe una empresa con ese código")
+        rol = "usuario"
+
     usuario = Usuario(
         empresa_id=empresa.id,
         nombre=datos.nombre,
+        username=username,
         email=datos.email,
         password_hash=hash_password(datos.password),
-        rol="admin",
+        rol=rol,
     )
     db.add(usuario)
     db.commit()
@@ -83,10 +138,11 @@ def registro(datos: schemas.RegistroRequest, db: Session = Depends(get_db)):
 @app.post("/login", response_model=schemas.TokenResponse)
 def login(datos: schemas.LoginRequest, db: Session = Depends(get_db)):
 
-    usuario = db.query(Usuario).filter(Usuario.email == datos.email).first()
+    username = (datos.username or "").strip().lower()
+    usuario = db.query(Usuario).filter(Usuario.username == username).first()
 
     if not usuario or not verify_password(datos.password, usuario.password_hash):
-        raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos")
+        raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos")
 
     token = crear_token(usuario)
     return {"access_token": token, "token_type": "bearer", "usuario": usuario_payload(usuario, db)}

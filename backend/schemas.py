@@ -33,23 +33,28 @@ class VentaUpdate(BaseModel):
 # ----------------- Autenticación / multiempresa -----------------
 
 class RegistroRequest(BaseModel):
-    empresa_nombre: str
+    tipo: str  # "empresario" (crea empresa) o "usuario" (se une con código)
     nombre: str
-    email: str
+    username: str
     password: str
+    email: str | None = None
+    empresa_nombre: str | None = None   # requerido si tipo == "empresario"
+    empresa_codigo: str | None = None   # requerido si tipo == "usuario"
 
 
 class LoginRequest(BaseModel):
-    email: str
+    username: str
     password: str
 
 
 class UsuarioOut(BaseModel):
     id: int
     nombre: str
-    email: str
+    username: str
+    email: str | None = None
     empresa_id: int
     empresa_nombre: str | None = None
+    empresa_codigo: str | None = None
     rol: str
 
     class Config:

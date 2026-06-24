@@ -19,17 +19,13 @@ export function setAuthToken(token) {
   }
 }
 
-export async function login(email, password) {
-  const res = await axios.post("/login", { email, password });
+export async function login(username, password) {
+  const res = await axios.post("/login", { username, password });
   return res.data;
 }
 
-export async function registro(empresa_nombre, nombre, email, password) {
-  const res = await axios.post("/registro", {
-    empresa_nombre,
-    nombre,
-    email,
-    password,
-  });
+// payload = { tipo, nombre, username, password, email?, empresa_nombre?, empresa_codigo? }
+export async function registro(payload) {
+  const res = await axios.post("/registro", payload);
   return res.data;
 }
