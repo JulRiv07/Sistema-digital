@@ -9,6 +9,7 @@ class Empresa(Base):
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, nullable=False)
     codigo = Column(String, nullable=False, unique=True, index=True)
+    logo = Column(String, nullable=True)  # imagen en base64 (data URL)
     creado_en = Column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -20,6 +21,7 @@ class Usuario(Base):
     nombre = Column(String, nullable=False)
     username = Column(String, nullable=False, unique=True, index=True)
     email = Column(String, nullable=True, unique=True, index=True)
+    telefono = Column(String, nullable=True)
     password_hash = Column(String, nullable=False)
     rol = Column(String, nullable=False, server_default="admin")
     creado_en = Column(DateTime(timezone=True), server_default=func.now())

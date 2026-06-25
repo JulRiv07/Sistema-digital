@@ -52,13 +52,26 @@ class UsuarioOut(BaseModel):
     nombre: str
     username: str
     email: str | None = None
+    telefono: str | None = None
     empresa_id: int
     empresa_nombre: str | None = None
     empresa_codigo: str | None = None
+    empresa_logo: str | None = None
     rol: str
 
     class Config:
         from_attributes = True
+
+
+class PerfilUpdate(BaseModel):
+    nombre: str
+    username: str
+    email: str | None = None
+    telefono: str | None = None
+
+
+class LogoUpdate(BaseModel):
+    logo: str | None = None
 
 
 class TokenResponse(BaseModel):

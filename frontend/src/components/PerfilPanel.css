@@ -1,0 +1,41 @@
+.perfil-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.perfil-title {
+  color: #6b3f3f;
+  margin: 0;
+}
+
+.perfil-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 6px 18px rgba(168, 120, 120, 0.15);
+}
+
+.perfil-card h3 {
+  margin: 0 0 12px;
+  color: #7a4f4f;
+}
+
+.perfil-aviso {
+  background: #f3e2e2;
+  color: #7a4f4f;
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.perfil-error {
+  background: #f7e0e0;
+  color: #b04a4a;
+  border: 1px solid #e3b9b9;
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+}

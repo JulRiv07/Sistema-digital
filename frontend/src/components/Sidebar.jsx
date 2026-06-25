@@ -87,6 +87,14 @@ function Sidebar({ activeSection, setActiveSection }) {
         Ver gastos
       </button>
 
+      <button
+        className={`sidebar-button ${activeSection === "perfil" ? "active" : ""}`}
+        onClick={() => setActiveSection("perfil")}
+      >
+        <img src={cliente} className="button-icon" />
+        Mi perfil
+      </button>
+
       {esAdmin && (
         <button
           className={`sidebar-button ${activeSection === "admin" ? "active" : ""}`}

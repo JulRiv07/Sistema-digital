@@ -10,11 +10,16 @@ function Header() {
 
   const empresaNombre = usuario?.empresa_nombre || "Sistema Digital";
   const esPrincipal = empresaNombre === EMPRESA_PRINCIPAL;
+  const logoEmpresa = usuario?.empresa_logo;
 
   return (
     <header className="header">
       <div className="header-brand">
-        {esPrincipal && <img src={Logo} alt="Logo" className="header-logo" />}
+        {logoEmpresa ? (
+          <img src={logoEmpresa} alt="Logo" className="header-logo" />
+        ) : esPrincipal ? (
+          <img src={Logo} alt="Logo" className="header-logo" />
+        ) : null}
         <h1 className="header-title">{empresaNombre}</h1>
       </div>
 

@@ -48,10 +48,50 @@ def usuario_payload(usuario: Usuario, db: Session) -> dict:
         "nombre": usuario.nombre,
         "username": usuario.username,
         "email": usuario.email,
+        "telefono": usuario.telefono,
         "empresa_id": usuario.empresa_id,
         "empresa_nombre": empresa.nombre if empresa else None,
         "empresa_codigo": empresa.codigo if empresa else None,
+        "empresa_logo": empresa.logo if empresa else None,
         "rol": usuario.rol,
+    }
+
+
+def estadisticas_usuario(db: Session, empresa_id: int, usuario_id: int) -> dict:
+    """Calcula las estadísticas de lo que ha registrado un usuario."""
+    ventas_total = db.query(func.sum(Venta.total)).filter(
+        Venta.empresa_id == empresa_id, Venta.usuario_id == usuario_id
+    ).scalar() or 0
+    ventas_count = db.query(func.count(Venta.id)).filter(
+        Venta.empresa_id == empresa_id, Venta.usuario_id == usuario_id
+    ).scalar() or 0
+
+    pagos_total = db.query(func.sum(Pago.monto)).filter(
+        Pago.empresa_id == empresa_id, Pago.usuario_id == usuario_id
+    ).scalar() or 0
+    pagos_count = db.query(func.count(Pago.id)).filter(
+        Pago.empresa_id == empresa_id, Pago.usuario_id == usuario_id
+    ).scalar() or 0
+
+    gastos_total = db.query(func.sum(Gasto.monto)).filter(
+        Gasto.empresa_id == empresa_id, Gasto.usuario_id == usuario_id
+    ).scalar() or 0
+    gastos_count = db.query(func.count(Gasto.id)).filter(
+        Gasto.empresa_id == empresa_id, Gasto.usuario_id == usuario_id
+    ).scalar() or 0
+
+    clientes_count = db.query(func.count(Cliente.id)).filter(
+        Cliente.empresa_id == empresa_id, Cliente.usuario_id == usuario_id
+    ).scalar() or 0
+
+    return {
+        "ventas_count": ventas_count,
+        "ventas_total": ventas_total,
+        "pagos_count": pagos_count,
+        "pagos_total": pagos_total,
+        "gastos_count": gastos_count,
+        "gastos_total": gastos_total,
+        "clientes_count": clientes_count,
     }
 
 
@@ -153,6 +193,48 @@ def me(usuario: Usuario = Depends(get_usuario_actual), db: Session = Depends(get
     return usuario_payload(usuario, db)
 
 
+# ===================== PERFIL (cualquier usuario) =====================
+
+@app.put("/perfil", response_model=schemas.UsuarioOut)
+def actualizar_perfil(
+    datos: schemas.PerfilUpdate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    nombre = (datos.nombre or "").strip()
+    if not nombre:
+        raise HTTPException(status_code=400, detail="El nombre no puede estar vacío")
+
+    username = (datos.username or "").strip().lower()
+    if len(username) < 3:
+        raise HTTPException(status_code=400, detail="El nombre de usuario debe tener al menos 3 caracteres")
+
+    # username único entre OTROS usuarios
+    if db.query(Usuario).filter(Usuario.username == username, Usuario.id != usuario.id).first():
+        raise HTTPException(status_code=400, detail="Ese nombre de usuario ya está en uso")
+
+    # email único (si lo dan) entre OTROS usuarios
+    if datos.email:
+        if db.query(Usuario).filter(Usuario.email == datos.email, Usuario.id != usuario.id).first():
+            raise HTTPException(status_code=400, detail="Ese correo ya está en uso")
+
+    usuario.nombre = nombre
+    usuario.username = username
+    usuario.email = datos.email or None
+    usuario.telefono = datos.telefono or None
+    db.commit()
+    db.refresh(usuario)
+    return usuario_payload(usuario, db)
+
+
+@app.get("/perfil/estadisticas")
+def mis_estadisticas(
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    return estadisticas_usuario(db, usuario.empresa_id, usuario.id)
+
+
 # ===================== ADMINISTRACIÓN DE EMPRESA (solo admin) =====================
 
 def requiere_admin(usuario: Usuario):
@@ -170,6 +252,35 @@ def listar_empleados(
         .filter(Usuario.empresa_id == usuario.empresa_id)\
         .order_by(Usuario.id)\
         .all()
+
+
+@app.put("/empresa/logo")
+def cambiar_logo_empresa(
+    datos: schemas.LogoUpdate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+    empresa = db.query(Empresa).filter(Empresa.id == usuario.empresa_id).first()
+    empresa.logo = datos.logo or None
+    db.commit()
+    return {"mensaje": "Logo actualizado"}
+
+
+@app.get("/empresa/empleados/{usuario_id}/estadisticas")
+def estadisticas_empleado(
+    usuario_id: int,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+    miembro = db.query(Usuario).filter(
+        Usuario.id == usuario_id,
+        Usuario.empresa_id == usuario.empresa_id,
+    ).first()
+    if not miembro:
+        raise HTTPException(status_code=404, detail="Empleado no encontrado")
+    return estadisticas_usuario(db, usuario.empresa_id, usuario_id)
 
 
 @app.put("/empresa/nombre")

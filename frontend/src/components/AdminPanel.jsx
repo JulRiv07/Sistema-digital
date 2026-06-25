@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import { leerImagenRedimensionada } from "../services/image";
+import Estadisticas from "./Estadisticas";
 import Modal from "./Modal";
 import "./AdminPanel.css";
 
@@ -12,6 +14,9 @@ function AdminPanel() {
   const [mensaje, setMensaje] = useState("");
   const [modalEliminar, setModalEliminar] = useState(false);
   const [copiado, setCopiado] = useState(false);
+
+  const [expandido, setExpandido] = useState(null);
+  const [statsEmp, setStatsEmp] = useState({});
 
   const cargarEmpleados = () => {
     axios
@@ -33,6 +38,29 @@ function AdminPanel() {
     navigator.clipboard?.writeText(usuario?.empresa_codigo || "");
     setCopiado(true);
     setTimeout(() => setCopiado(false), 2000);
+  };
+
+  const subirLogo = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const dataUrl = await leerImagenRedimensionada(file, 256);
+      await axios.put("/empresa/logo", { logo: dataUrl });
+      await refrescarUsuario();
+      aviso("Logo actualizado ✅");
+    } catch {
+      aviso("No se pudo subir el logo");
+    }
+  };
+
+  const quitarLogo = async () => {
+    try {
+      await axios.put("/empresa/logo", { logo: null });
+      await refrescarUsuario();
+      aviso("Logo eliminado");
+    } catch {
+      aviso("No se pudo quitar el logo");
+    }
   };
 
   const guardarNombre = async (e) => {
@@ -57,6 +85,23 @@ function AdminPanel() {
     }
   };
 
+  const verStats = async (emp) => {
+    if (expandido === emp.id) {
+      setExpandido(null);
+      return;
+    }
+    if (!statsEmp[emp.id]) {
+      try {
+        const r = await axios.get(`/empresa/empleados/${emp.id}/estadisticas`);
+        setStatsEmp((prev) => ({ ...prev, [emp.id]: r.data }));
+      } catch {
+        aviso("No se pudieron cargar las estadísticas");
+        return;
+      }
+    }
+    setExpandido(emp.id);
+  };
+
   const eliminarEmpresa = async () => {
     try {
       await axios.delete("/empresa");
@@ -74,6 +119,32 @@ function AdminPanel() {
       <h2 className="admin-title">Administración</h2>
 
       {mensaje && <div className="admin-aviso">{mensaje}</div>}
+
+      {/* Logo de la empresa */}
+      <section className="admin-card">
+        <h3>Logo de la empresa</h3>
+        <p className="admin-desc">
+          Sube una imagen; aparecerá al lado del nombre de tu empresa.
+        </p>
+        <div className="admin-logo-row">
+          {usuario?.empresa_logo ? (
+            <img src={usuario.empresa_logo} alt="Logo" className="admin-logo-preview" />
+          ) : (
+            <div className="admin-logo-vacio">Sin logo</div>
+          )}
+          <div className="admin-logo-acciones">
+            <label className="admin-btn admin-btn-file">
+              Subir logo
+              <input type="file" accept="image/*" onChange={subirLogo} hidden />
+            </label>
+            {usuario?.empresa_logo && (
+              <button className="admin-btn-mini" onClick={quitarLogo}>
+                Quitar
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
 
       {/* Código de empresa */}
       <section className="admin-card">
@@ -110,24 +181,34 @@ function AdminPanel() {
         <h3>Empleados ({empleados.length})</h3>
         {empleados.length === 0 && <p className="admin-desc">No hay empleados aún.</p>}
         {empleados.map((emp) => (
-          <div key={emp.id} className="admin-empleado">
-            <div className="admin-empleado-info">
-              <span className="admin-empleado-nombre">{emp.nombre}</span>
-              <span className="admin-empleado-user">@{emp.username}</span>
+          <div key={emp.id} className="admin-empleado-bloque">
+            <div className="admin-empleado">
+              <div className="admin-empleado-info">
+                <span className="admin-empleado-nombre">{emp.nombre}</span>
+                <span className="admin-empleado-user">@{emp.username}</span>
+              </div>
+              <div className="admin-empleado-acciones">
+                <span className={`admin-rol admin-rol-${emp.rol}`}>{rolLabel(emp.rol)}</span>
+                <button className="admin-btn-mini" onClick={() => verStats(emp)}>
+                  {expandido === emp.id ? "Ocultar" : "Estadísticas"}
+                </button>
+                {emp.id !== usuario?.id &&
+                  (emp.rol === "empleado" ? (
+                    <button className="admin-btn-mini" onClick={() => cambiarRol(emp, "admin")}>
+                      Hacer empresario
+                    </button>
+                  ) : (
+                    <button className="admin-btn-mini" onClick={() => cambiarRol(emp, "empleado")}>
+                      Pasar a empleado
+                    </button>
+                  ))}
+              </div>
             </div>
-            <div className="admin-empleado-acciones">
-              <span className={`admin-rol admin-rol-${emp.rol}`}>{rolLabel(emp.rol)}</span>
-              {emp.id !== usuario?.id &&
-                (emp.rol === "empleado" ? (
-                  <button className="admin-btn-mini" onClick={() => cambiarRol(emp, "admin")}>
-                    Hacer empresario
-                  </button>
-                ) : (
-                  <button className="admin-btn-mini" onClick={() => cambiarRol(emp, "empleado")}>
-                    Pasar a empleado
-                  </button>
-                ))}
-            </div>
+            {expandido === emp.id && (
+              <div className="admin-empleado-stats">
+                <Estadisticas stats={statsEmp[emp.id]} />
+              </div>
+            )}
           </div>
         ))}
       </section>
