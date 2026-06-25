@@ -30,17 +30,19 @@ function rolLabel(rol) {
   return rol === "admin" ? "Empresario" : "Empleado";
 }
 
-function EstadisticasEmpresa() {
+function EstadisticasEmpresa({ periodo }) {
   const [datos, setDatos] = useState([]);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
+    const params = periodo ? `?mes=${periodo.mes}&anio=${periodo.año}` : "";
+    setCargando(true);
     axios
-      .get("/empresa/estadisticas")
+      .get(`/empresa/estadisticas${params}`)
       .then((r) => setDatos(r.data))
       .catch(() => {})
       .finally(() => setCargando(false));
-  }, []);
+  }, [periodo]);
 
   const ventasData = datos.map((d) => ({ label: d.nombre, valor: d.ventas_total }));
   const pagosData = datos.map((d) => ({ label: d.nombre, valor: d.pagos_total }));

@@ -15,7 +15,8 @@ function ContentPanel({
   activeSection,
   selectedCliente,
   setSelectedCliente,
-  setActiveSection
+  setActiveSection,
+  periodo
 }) {
 
   switch (activeSection) {
@@ -60,7 +61,7 @@ function ContentPanel({
         return <PerfilPanel />;
 
       case "estadisticas":
-        return <EstadisticasEmpresa />;
+        return <EstadisticasEmpresa periodo={periodo} />;
 
     default:
       return <h4>Selecciona una opción</h4>;

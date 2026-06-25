@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { fmtCurrency } from "../services/format";
 import axios from "axios";
 
-function SummaryCards({ refreshKey }) {
+function SummaryCards({ periodo }) {
 
   const [resumen, setResumen] = useState({
     vendido: 0,
@@ -13,31 +13,32 @@ function SummaryCards({ refreshKey }) {
   });
 
   useEffect(() => {
-    axios.get("/resumen")
+    const params = periodo ? `?mes=${periodo.mes}&anio=${periodo.año}` : "";
+    axios.get(`/resumen${params}`)
       .then(res => {
         setResumen(res.data);
       })
       .catch(err => {
         console.error("Error cargando resumen:", err);
       });
-  }, [refreshKey]);
+  }, [periodo]);
 
   return (
     <section className="summary">
       <div className="card">
-        Vendido mes actual: {fmtCurrency(resumen.vendido)}
+        Vendido: {fmtCurrency(resumen.vendido)}
       </div>
       {resumen.gastos != null && (
         <div className="card">
-          Gastos mes actual: {fmtCurrency(resumen.gastos)}
+          Gastos: {fmtCurrency(resumen.gastos)}
         </div>
       )}
       <div className="card">
-        Pendiente mes actual: {fmtCurrency(resumen.pendiente)}
+        Pendiente: {fmtCurrency(resumen.pendiente)}
       </div>
       {resumen.ganancia != null && (
         <div className="card">
-          Ganancia mes actual: {fmtCurrency(resumen.ganancia)}
+          Ganancia: {fmtCurrency(resumen.ganancia)}
         </div>
       )}
     </section>

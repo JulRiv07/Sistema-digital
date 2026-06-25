@@ -58,40 +58,52 @@ def usuario_payload(usuario: Usuario, db: Session) -> dict:
     }
 
 
-def estadisticas_usuario(db: Session, empresa_id: int, usuario_id: int) -> dict:
-    """Calcula las estadísticas de lo que ha registrado un usuario."""
-    ventas_total = db.query(func.sum(Venta.total)).filter(
-        Venta.empresa_id == empresa_id, Venta.usuario_id == usuario_id
-    ).scalar() or 0
-    ventas_count = db.query(func.count(Venta.id)).filter(
-        Venta.empresa_id == empresa_id, Venta.usuario_id == usuario_id
-    ).scalar() or 0
+def estadisticas_usuario(db: Session, empresa_id: int, usuario_id: int,
+                         mes: int = None, anio: int = None) -> dict:
+    """Calcula las estadísticas de lo que ha registrado un usuario.
+    Si se pasa mes y anio, filtra solo ese período."""
+    filtrar = mes is not None and anio is not None
 
-    pagos_total = db.query(func.sum(Pago.monto)).filter(
-        Pago.empresa_id == empresa_id, Pago.usuario_id == usuario_id
-    ).scalar() or 0
-    pagos_count = db.query(func.count(Pago.id)).filter(
-        Pago.empresa_id == empresa_id, Pago.usuario_id == usuario_id
-    ).scalar() or 0
+    def suma(modelo, columna):
+        q = db.query(func.sum(columna)).filter(
+            modelo.empresa_id == empresa_id, modelo.usuario_id == usuario_id
+        )
+        if filtrar:
+            q = q.filter(
+                func.extract("month", modelo.fecha) == mes,
+                func.extract("year", modelo.fecha) == anio,
+            )
+        return q.scalar() or 0
 
-    gastos_total = db.query(func.sum(Gasto.monto)).filter(
-        Gasto.empresa_id == empresa_id, Gasto.usuario_id == usuario_id
-    ).scalar() or 0
-    gastos_count = db.query(func.count(Gasto.id)).filter(
-        Gasto.empresa_id == empresa_id, Gasto.usuario_id == usuario_id
-    ).scalar() or 0
+    def conteo(modelo):
+        q = db.query(func.count(modelo.id)).filter(
+            modelo.empresa_id == empresa_id, modelo.usuario_id == usuario_id
+        )
+        if filtrar:
+            q = q.filter(
+                func.extract("month", modelo.fecha) == mes,
+                func.extract("year", modelo.fecha) == anio,
+            )
+        return q.scalar() or 0
 
-    clientes_count = db.query(func.count(Cliente.id)).filter(
+    # Clientes se filtran por su fecha de creación
+    cq = db.query(func.count(Cliente.id)).filter(
         Cliente.empresa_id == empresa_id, Cliente.usuario_id == usuario_id
-    ).scalar() or 0
+    )
+    if filtrar:
+        cq = cq.filter(
+            func.extract("month", Cliente.creado_en) == mes,
+            func.extract("year", Cliente.creado_en) == anio,
+        )
+    clientes_count = cq.scalar() or 0
 
     return {
-        "ventas_count": ventas_count,
-        "ventas_total": ventas_total,
-        "pagos_count": pagos_count,
-        "pagos_total": pagos_total,
-        "gastos_count": gastos_count,
-        "gastos_total": gastos_total,
+        "ventas_count": conteo(Venta),
+        "ventas_total": suma(Venta, Venta.total),
+        "pagos_count": conteo(Pago),
+        "pagos_total": suma(Pago, Pago.monto),
+        "gastos_count": conteo(Gasto),
+        "gastos_total": suma(Gasto, Gasto.monto),
         "clientes_count": clientes_count,
     }
 
@@ -270,6 +282,8 @@ def requiere_empleado(usuario: Usuario):
 
 @app.get("/empresa/estadisticas")
 def estadisticas_empresa(
+    mes: int = None,
+    anio: int = None,
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_usuario_actual),
 ):
@@ -283,7 +297,7 @@ def estadisticas_empresa(
         # El empresario que solo supervisa (rol admin) no aparece en stats
         if m.rol == "admin":
             continue
-        stats = estadisticas_usuario(db, usuario.empresa_id, m.id)
+        stats = estadisticas_usuario(db, usuario.empresa_id, m.id, mes, anio)
         resultado.append({
             "id": m.id,
             "nombre": m.nombre,
@@ -793,36 +807,36 @@ def estado_cliente(
 
 @app.get("/resumen")
 def resumen_general(
+    mes: int = None,
+    anio: int = None,
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_usuario_actual),
 ):
     ahora = datetime.now()
-    mes_actual = ahora.month
-    año_actual = ahora.year
+    mes_sel = mes or ahora.month
+    año_sel = anio or ahora.year
     emp = usuario.empresa_id
 
     ventas_mes = db.query(func.sum(Venta.total)).filter(
         Venta.empresa_id == emp,
-        func.extract("month", Venta.fecha) == mes_actual,
-        func.extract("year", Venta.fecha) == año_actual,
+        func.extract("month", Venta.fecha) == mes_sel,
+        func.extract("year", Venta.fecha) == año_sel,
     ).scalar() or 0
 
     gastos_mes = db.query(func.sum(Gasto.monto)).filter(
         Gasto.empresa_id == emp,
-        func.extract("month", Gasto.fecha) == mes_actual,
-        func.extract("year", Gasto.fecha) == año_actual,
+        func.extract("month", Gasto.fecha) == mes_sel,
+        func.extract("year", Gasto.fecha) == año_sel,
     ).scalar() or 0
 
     pago_mes = db.query(func.sum(Pago.monto)).filter(
         Pago.empresa_id == emp,
-        func.extract("month", Pago.fecha) == mes_actual,
-        func.extract("year", Pago.fecha) == año_actual,
+        func.extract("month", Pago.fecha) == mes_sel,
+        func.extract("year", Pago.fecha) == año_sel,
     ).scalar() or 0
 
-    total_ventas = db.query(func.sum(Venta.total)).filter(Venta.empresa_id == emp).scalar() or 0
-    total_pagos = db.query(func.sum(Pago.monto)).filter(Pago.empresa_id == emp).scalar() or 0
-    pendiente_total = total_ventas - total_pagos
-
+    # Pendiente del período: lo vendido menos lo cobrado en ese mes
+    pendiente_mes = ventas_mes - pago_mes
     ganancia_mes = pago_mes - gastos_mes
 
     # El empleado no puede ver gastos ni ganancia
@@ -830,14 +844,14 @@ def resumen_general(
         return {
             "vendido": ventas_mes,
             "gastos": None,
-            "pendiente": pendiente_total,
+            "pendiente": pendiente_mes,
             "ganancia": None,
         }
 
     return {
         "vendido": ventas_mes,
         "gastos": gastos_mes,
-        "pendiente": pendiente_total,
+        "pendiente": pendiente_mes,
         "ganancia": ganancia_mes,
     }
 
