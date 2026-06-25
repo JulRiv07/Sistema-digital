@@ -39,13 +39,14 @@ function Login({ irARegistro }) {
         <h2 className="auth-title">Iniciar sesión</h2>
         <p className="auth-subtitle">Bienvenid@ de nuevo</p>
 
-        <form className="form-container" onSubmit={handleSubmit}>
+        <form className="form-container" onSubmit={handleSubmit} autoComplete="off">
           <label>Usuario</label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="tu nombre de usuario"
+            autoComplete="off"
           />
 
           <label>Contraseña</label>

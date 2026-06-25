@@ -49,6 +49,30 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Cierre de sesión automático por inactividad (30 minutos)
+  useEffect(() => {
+    if (!usuario) return;
+
+    const LIMITE = 30 * 60 * 1000; // 30 minutos
+    let timer;
+
+    const reiniciar = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        cerrarSesion();
+      }, LIMITE);
+    };
+
+    const eventos = ["mousemove", "keydown", "click", "scroll", "touchstart"];
+    eventos.forEach((e) => window.addEventListener(e, reiniciar));
+    reiniciar();
+
+    return () => {
+      clearTimeout(timer);
+      eventos.forEach((e) => window.removeEventListener(e, reiniciar));
+    };
+  }, [usuario]);
+
   return (
     <AuthContext.Provider
       value={{ usuario, cargando, iniciarSesion, cerrarSesion, refrescarUsuario }}

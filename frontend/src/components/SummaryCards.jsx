@@ -27,15 +27,19 @@ function SummaryCards({ refreshKey }) {
       <div className="card">
         Vendido mes actual: {fmtCurrency(resumen.vendido)}
       </div>
-      <div className="card">
-        Gastos mes actual: {fmtCurrency(resumen.gastos)}
-      </div>
+      {resumen.gastos != null && (
+        <div className="card">
+          Gastos mes actual: {fmtCurrency(resumen.gastos)}
+        </div>
+      )}
       <div className="card">
         Pendiente mes actual: {fmtCurrency(resumen.pendiente)}
       </div>
-      <div className="card">
-        Ganancia mes actual: {fmtCurrency(resumen.ganancia)}
-      </div>
+      {resumen.ganancia != null && (
+        <div className="card">
+          Ganancia mes actual: {fmtCurrency(resumen.ganancia)}
+        </div>
+      )}
     </section>
   );
 }

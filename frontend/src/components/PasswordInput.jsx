@@ -36,7 +36,7 @@ function EyeOffIcon() {
   );
 }
 
-function PasswordInput({ value, onChange, placeholder = "••••••••" }) {
+function PasswordInput({ value, onChange, placeholder = "••••••••", autoComplete = "off" }) {
   const [ver, setVer] = useState(false);
 
   return (
@@ -46,6 +46,7 @@ function PasswordInput({ value, onChange, placeholder = "•••••••�
         value={value}
         onChange={onChange}
         placeholder={placeholder}
+        autoComplete={autoComplete}
       />
       <button
         type="button"

@@ -10,7 +10,8 @@ import Footer from "../components/Footer";
 function Dashboard() {
 
   const { usuario } = useAuth();
-  const seccionInicial = usuario?.rol === "admin" ? "estadisticas" : "venta";
+  const puedeOperar = usuario?.rol === "empleado" || usuario?.rol === "propietaria";
+  const seccionInicial = puedeOperar ? "venta" : "estadisticas";
 
   const [activeSection, setActiveSection] = useState(seccionInicial);
   const [selectedCliente, setSelectedCliente] = useState(null);

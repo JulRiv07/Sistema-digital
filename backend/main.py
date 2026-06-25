@@ -235,15 +235,35 @@ def mis_estadisticas(
     return estadisticas_usuario(db, usuario.empresa_id, usuario.id)
 
 
+@app.put("/perfil/password")
+def cambiar_password(
+    datos: schemas.PasswordChange,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    if not verify_password(datos.actual, usuario.password_hash):
+        raise HTTPException(status_code=400, detail="La contraseña actual es incorrecta")
+    validar_password(datos.nueva)
+    usuario.password_hash = hash_password(datos.nueva)
+    db.commit()
+    return {"mensaje": "Contraseña actualizada"}
+
+
 # ===================== ADMINISTRACIÓN DE EMPRESA (solo admin) =====================
 
+# Roles con poderes de administración (empresario y propietaria)
+ADMIN_ROLES = ("admin", "propietaria")
+# Roles que pueden operar (registrar ventas, pagos): empleado y propietaria
+OPERADOR_ROLES = ("empleado", "propietaria")
+
+
 def requiere_admin(usuario: Usuario):
-    if usuario.rol != "admin":
+    if usuario.rol not in ADMIN_ROLES:
         raise HTTPException(status_code=403, detail="Solo el empresario puede hacer esto")
 
 
 def requiere_empleado(usuario: Usuario):
-    if usuario.rol != "empleado":
+    if usuario.rol not in OPERADOR_ROLES:
         raise HTTPException(status_code=403, detail="Esta acción es solo para empleados")
 
 
@@ -259,6 +279,9 @@ def estadisticas_empresa(
         .all()
     resultado = []
     for m in miembros:
+        # El empresario que solo supervisa (rol admin) no aparece en stats
+        if m.rol == "admin":
+            continue
         stats = estadisticas_usuario(db, usuario.empresa_id, m.id)
         resultado.append({
             "id": m.id,
@@ -337,7 +360,7 @@ def cambiar_rol_empleado(
 ):
     requiere_admin(usuario)
     nuevo_rol = (datos.rol or "").strip().lower()
-    if nuevo_rol not in ("admin", "empleado"):
+    if nuevo_rol not in ("admin", "empleado", "propietaria"):
         raise HTTPException(status_code=400, detail="Rol inválido")
 
     miembro = db.query(Usuario).filter(
@@ -348,10 +371,10 @@ def cambiar_rol_empleado(
         raise HTTPException(status_code=404, detail="Empleado no encontrado")
 
     # No dejar la empresa sin ningún empresario
-    if miembro.rol == "admin" and nuevo_rol != "admin":
+    if miembro.rol in ADMIN_ROLES and nuevo_rol not in ADMIN_ROLES:
         admins = db.query(Usuario).filter(
             Usuario.empresa_id == usuario.empresa_id,
-            Usuario.rol == "admin",
+            Usuario.rol.in_(ADMIN_ROLES),
         ).count()
         if admins <= 1:
             raise HTTPException(status_code=400, detail="Debe quedar al menos un empresario")
@@ -359,6 +382,62 @@ def cambiar_rol_empleado(
     miembro.rol = nuevo_rol
     db.commit()
     return {"mensaje": "Rol actualizado"}
+
+
+@app.put("/empresa/codigo/regenerar")
+def regenerar_codigo(
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+    empresa = db.query(Empresa).filter(Empresa.id == usuario.empresa_id).first()
+    empresa.codigo = generar_codigo_empresa(db)
+    db.commit()
+    db.refresh(empresa)
+    return {"mensaje": "Código regenerado", "codigo": empresa.codigo}
+
+
+@app.delete("/empresa/empleados/{usuario_id}")
+def quitar_empleado(
+    usuario_id: int,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+
+    if usuario_id == usuario.id:
+        raise HTTPException(status_code=400, detail="No puedes quitarte a ti mismo")
+
+    miembro = db.query(Usuario).filter(
+        Usuario.id == usuario_id,
+        Usuario.empresa_id == usuario.empresa_id,
+    ).first()
+    if not miembro:
+        raise HTTPException(status_code=404, detail="Empleado no encontrado")
+
+    # No dejar la empresa sin ningún empresario
+    if miembro.rol in ADMIN_ROLES:
+        admins = db.query(Usuario).filter(
+            Usuario.empresa_id == usuario.empresa_id,
+            Usuario.rol.in_(ADMIN_ROLES),
+        ).count()
+        if admins <= 1:
+            raise HTTPException(status_code=400, detail="Debe quedar al menos un empresario")
+
+    # Reasignar lo que registró al empresario actual, para no perder datos
+    emp = usuario.empresa_id
+    db.query(Venta).filter(Venta.empresa_id == emp, Venta.usuario_id == usuario_id)\
+        .update({Venta.usuario_id: usuario.id})
+    db.query(Pago).filter(Pago.empresa_id == emp, Pago.usuario_id == usuario_id)\
+        .update({Pago.usuario_id: usuario.id})
+    db.query(Gasto).filter(Gasto.empresa_id == emp, Gasto.usuario_id == usuario_id)\
+        .update({Gasto.usuario_id: usuario.id})
+    db.query(Cliente).filter(Cliente.empresa_id == emp, Cliente.usuario_id == usuario_id)\
+        .update({Cliente.usuario_id: usuario.id})
+
+    db.delete(miembro)
+    db.commit()
+    return {"mensaje": "Empleado quitado de la empresa"}
 
 
 @app.delete("/empresa")
@@ -615,6 +694,7 @@ def listar_gastos(
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_usuario_actual),
 ):
+    requiere_admin(usuario)
     query = db.query(
         Gasto.id,
         Gasto.descripcion,
@@ -724,6 +804,15 @@ def resumen_general(
     pendiente_total = total_ventas - total_pagos
 
     ganancia_mes = pago_mes - gastos_mes
+
+    # El empleado no puede ver gastos ni ganancia
+    if usuario.rol not in ADMIN_ROLES:
+        return {
+            "vendido": ventas_mes,
+            "gastos": None,
+            "pendiente": pendiente_total,
+            "ganancia": None,
+        }
 
     return {
         "vendido": ventas_mes,

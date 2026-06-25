@@ -81,6 +81,28 @@ function AdminPanel() {
     }
   };
 
+  const regenerarCodigo = async () => {
+    if (!window.confirm("¿Generar un código nuevo? El anterior dejará de funcionar.")) return;
+    try {
+      await axios.put("/empresa/codigo/regenerar");
+      await refrescarUsuario();
+      aviso("Código regenerado ✅");
+    } catch (err) {
+      aviso(err.response?.data?.detail || "No se pudo regenerar el código");
+    }
+  };
+
+  const quitarEmpleado = async (empleado) => {
+    if (!window.confirm(`¿Quitar a ${empleado.nombre} de la empresa?`)) return;
+    try {
+      await axios.delete(`/empresa/empleados/${empleado.id}`);
+      cargarEmpleados();
+      aviso("Empleado quitado ✅");
+    } catch (err) {
+      aviso(err.response?.data?.detail || "No se pudo quitar al empleado");
+    }
+  };
+
   const eliminarEmpresa = async () => {
     try {
       await axios.delete("/empresa");
@@ -136,6 +158,9 @@ function AdminPanel() {
           <button className="admin-btn" onClick={copiarCodigo}>
             {copiado ? "¡Copiado!" : "Copiar"}
           </button>
+          <button className="admin-btn-mini" onClick={regenerarCodigo}>
+            Regenerar
+          </button>
         </div>
       </section>
 
@@ -168,16 +193,22 @@ function AdminPanel() {
               </div>
               <div className="admin-empleado-acciones">
                 <span className={`admin-rol admin-rol-${emp.rol}`}>{rolLabel(emp.rol)}</span>
-                {emp.id !== usuario?.id &&
-                  (emp.rol === "empleado" ? (
-                    <button className="admin-btn-mini" onClick={() => cambiarRol(emp, "admin")}>
-                      Hacer empresario
+                {emp.id !== usuario?.id && (
+                  <>
+                    {emp.rol === "empleado" ? (
+                      <button className="admin-btn-mini" onClick={() => cambiarRol(emp, "admin")}>
+                        Hacer empresario
+                      </button>
+                    ) : (
+                      <button className="admin-btn-mini" onClick={() => cambiarRol(emp, "empleado")}>
+                        Pasar a empleado
+                      </button>
+                    )}
+                    <button className="admin-btn-quitar" onClick={() => quitarEmpleado(emp)}>
+                      Quitar
                     </button>
-                  ) : (
-                    <button className="admin-btn-mini" onClick={() => cambiarRol(emp, "empleado")}>
-                      Pasar a empleado
-                    </button>
-                  ))}
+                  </>
+                )}
               </div>
             </div>
           </div>

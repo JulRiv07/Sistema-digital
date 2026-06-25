@@ -193,6 +193,21 @@
   background: #e5c9c9;
 }
 
+.admin-btn-quitar {
+  background: #f0d0d0;
+  color: #a52f23;
+  border: none;
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.admin-btn-quitar:hover {
+  background: #e9bcbc;
+}
+
 .admin-peligro {
   border: 1px solid #e3b3b3;
 }

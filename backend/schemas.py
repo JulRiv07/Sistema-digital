@@ -74,6 +74,11 @@ class LogoUpdate(BaseModel):
     logo: str | None = None
 
 
+class PasswordChange(BaseModel):
+    actual: str
+    nueva: str
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

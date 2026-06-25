@@ -32,6 +32,16 @@
   border-color: #c98b8b;
 }
 
+/* Evita el fondo gris/azul que el navegador pone al autocompletar */
+.form-container input:-webkit-autofill,
+.form-container input:-webkit-autofill:hover,
+.form-container input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #000;
+  -webkit-box-shadow: 0 0 0 1000px #f7e4e4 inset;
+  box-shadow: 0 0 0 1000px #f7e4e4 inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 /* Botón principal */
 .form-container button {
   margin-top: 10px;
