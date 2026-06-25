@@ -2,66 +2,57 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    
 }
 
 .clientes-title {
-    background-color: #eec3c3;
+    background-color: var(--c-label-bg);
     padding: 10px 15px;
     border-radius: 12px;
     font-weight: bold;
-    color: black;
+    color: var(--c-text);
 }
 
 .cliente-card {
-    background-color: #f7e4e4;
+    background-color: var(--c-soft);
     padding: 15px;
-    
-    border-radius: 15px;
+    border-radius: 12px;
     box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.08);
     transition: 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .cliente-card:hover {
     transform: translateY(-3px);
 }
 
+.cliente-info {
+    display: flex;
+    flex-direction: column;
+}
+
 .cliente-nombre {
-    color: black;
     font-weight: 600;
     font-size: 16px;
-    color: #5a3e3e;
+    color: var(--c-title);
 }
 
 .cliente-telefono {
     font-size: 14px;
-    color: #7a5c5c;
+    color: var(--c-muted);
     margin-top: 4px;
 }
 
-.cliente-card{
-    background:#f7e4e4;
-    padding:15px;
-    border-radius:12px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+.btn-delete {
+    background: #d9534f;
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
-.cliente-info{
-    display:flex;
-    flex-direction:column;
-}
-
-.btn-delete{
-    background:#d9534f;
-    border:none;
-    color:white;
-    padding:6px 12px;
-    border-radius:8px;
-    cursor:pointer;
-}
-
-.btn-delete:hover{
-    background:#c9302c;
+.btn-delete:hover {
+    background: #c9302c;
 }

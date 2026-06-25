@@ -41,7 +41,7 @@
 
 .header-username {
   font-weight: 600;
-  color: #5a3a3a;
+  color: var(--c-title);
 }
 
 .header-logout {

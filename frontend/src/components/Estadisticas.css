@@ -5,7 +5,7 @@
 }
 
 .stats-card {
-  background: #faf0f0;
+  background: var(--c-soft);
   border-radius: 14px;
   padding: 14px;
   display: flex;
@@ -17,7 +17,7 @@
 .stats-label {
   font-size: 13px;
   font-weight: 600;
-  color: #a07f7f;
+  color: var(--c-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -25,15 +25,15 @@
 .stats-num {
   font-size: 28px;
   font-weight: 800;
-  color: #6b3f3f;
+  color: var(--c-title);
   line-height: 1.2;
 }
 
 .stats-sub {
   font-size: 13px;
-  color: #8a6f6f;
+  color: var(--c-muted);
 }
 
 .stats-cargando {
-  color: #a07f7f;
+  color: var(--c-muted);
 }

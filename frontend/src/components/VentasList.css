@@ -2,11 +2,11 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    color: black;
+    color: var(--c-text);
 }
 
 .ventas-title {
-    background-color: #eec3c3;
+    background-color: var(--c-label-bg);
     padding: 12px 15px;
     border-radius: 12px;
     font-weight: bold;
@@ -20,21 +20,19 @@
 
 .filtros select {
     padding: 8px 12px;
-    color: black;
+    color: var(--c-text);
     border-radius: 10px;
-    border: 1px solid #d8a9a9;
-    background-color: #f7e4e4;
+    border: 1px solid var(--c-input-border);
+    background-color: var(--c-input-bg);
     font-size: 14px;
 }
 
 .venta-card {
-    background-color: #f7e4e4;
+    background-color: var(--c-soft);
     padding: 15px;
     border-radius: 15px;
-    box-shadow: 0px 5px 12px rgba(0,0,0,0.08);
+    box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.08);
     transition: 0.2s ease;
-
-    
 }
 
 .venta-card:hover {
@@ -48,7 +46,7 @@
 }
 
 .venta-total {
-    color: #5a3e3e;
+    color: var(--c-title);
 }
 
 .venta-extra {
@@ -56,7 +54,7 @@
     display: flex;
     justify-content: space-between;
     font-size: 12px;
-    color: #7a5c5c;
+    color: var(--c-muted);
 }
 
 .venta-buttons {
@@ -66,13 +64,13 @@
 }
 
 .btn-edit {
-    background-color: #d8a9a9;
+    background-color: var(--c-sidebar-btn-hover);
+    color: var(--c-text);
     border: none;
     border-radius: 8px;
     padding: 6px 14px;
     cursor: pointer;
     font-size: 13px;
-    
 }
 
 .btn-delete {
@@ -94,8 +92,8 @@
 .modal-form input,
 .modal-form select {
     padding: 5px;
-    color: black;
+    color: var(--c-text);
     border-radius: 10px;
-    border: 1px solid #d8a9a9;
-    background-color: #f7e4e4;
+    border: 1px solid var(--c-input-border);
+    background-color: var(--c-input-bg);
 }

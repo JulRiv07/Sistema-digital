@@ -1,105 +1,150 @@
 /* Paletas de color por empresa.
-   Las variables se aplican en .dashboard-container con la clase tema-XXX.
-   El login y el registro NO usan estas clases, así que se quedan en rosa. */
+   Se aplican en .dashboard-container con la clase tema-XXX.
+   El login y el registro NO usan estas clases (se quedan en rosa). */
 
 :root {
+  --c-bg: #edd6d6;
   --c-header-bg: #ca9f9f;
-  --c-app-bg: #edd6d6;
+  --c-footer-bg: #c79a9a;
+  --c-summary-bg: #e6c7c7;
+  --c-card-bg: #f0dddd;
+  --c-surface: #ffffff;
+  --c-soft: #f7e4e4;
+  --c-label-bg: #eec3c3;
   --c-accent: #c98b8b;
   --c-accent-hover: #b67979;
-  --c-label-bg: #eec3c3;
   --c-input-bg: #f7e4e4;
   --c-input-border: #d8a9a9;
   --c-sidebar-btn: #e4bcbc;
   --c-sidebar-btn-hover: #d8a9a9;
   --c-sidebar-btn-active: #d49494;
-  --c-footer-bg: #c79a9a;
-  --c-summary-bg: #e6c7c7;
-  --c-card-bg: #f0dddd;
   --c-title: #4a2f2f;
+  --c-text: #2e2222;
+  --c-muted: #7a5c5c;
 }
 
 .tema-rosa {
+  --c-bg: #edd6d6;
   --c-header-bg: #ca9f9f;
-  --c-app-bg: #edd6d6;
+  --c-footer-bg: #c79a9a;
+  --c-summary-bg: #e6c7c7;
+  --c-card-bg: #f0dddd;
+  --c-surface: #ffffff;
+  --c-soft: #f7e4e4;
+  --c-label-bg: #eec3c3;
   --c-accent: #c98b8b;
   --c-accent-hover: #b67979;
-  --c-label-bg: #eec3c3;
   --c-input-bg: #f7e4e4;
   --c-input-border: #d8a9a9;
   --c-sidebar-btn: #e4bcbc;
   --c-sidebar-btn-hover: #d8a9a9;
   --c-sidebar-btn-active: #d49494;
-  --c-footer-bg: #c79a9a;
-  --c-summary-bg: #e6c7c7;
-  --c-card-bg: #f0dddd;
   --c-title: #4a2f2f;
+  --c-text: #2e2222;
+  --c-muted: #7a5c5c;
 }
 
 .tema-azul {
+  --c-bg: #d6e0ed;
   --c-header-bg: #9fb0ca;
-  --c-app-bg: #d6e0ed;
+  --c-footer-bg: #9aaac7;
+  --c-summary-bg: #c7d3e6;
+  --c-card-bg: #dde6f0;
+  --c-surface: #ffffff;
+  --c-soft: #e4ebf7;
+  --c-label-bg: #c3d0ee;
   --c-accent: #8b9ec9;
   --c-accent-hover: #7989b6;
-  --c-label-bg: #c3d0ee;
   --c-input-bg: #e4ebf7;
   --c-input-border: #a9bad8;
   --c-sidebar-btn: #bccae4;
   --c-sidebar-btn-hover: #a9bad8;
   --c-sidebar-btn-active: #94a6d4;
-  --c-footer-bg: #9aaac7;
-  --c-summary-bg: #c7d3e6;
-  --c-card-bg: #dde6f0;
   --c-title: #2f3a4a;
+  --c-text: #22262e;
+  --c-muted: #5c6b7a;
 }
 
 .tema-amarillo {
+  --c-bg: #ede9d6;
   --c-header-bg: #cabf9f;
-  --c-app-bg: #ede9d6;
+  --c-footer-bg: #c7ba9a;
+  --c-summary-bg: #e6ddc7;
+  --c-card-bg: #f0ecdd;
+  --c-surface: #ffffff;
+  --c-soft: #f7f2e4;
+  --c-label-bg: #eee6c3;
   --c-accent: #c9b88b;
   --c-accent-hover: #b6a479;
-  --c-label-bg: #eee6c3;
   --c-input-bg: #f7f2e4;
   --c-input-border: #d8cda9;
   --c-sidebar-btn: #e4d9bc;
   --c-sidebar-btn-hover: #d8cda9;
   --c-sidebar-btn-active: #d4c594;
-  --c-footer-bg: #c7ba9a;
-  --c-summary-bg: #e6ddc7;
-  --c-card-bg: #f0ecdd;
   --c-title: #4a422f;
+  --c-text: #2e2a22;
+  --c-muted: #7a725c;
 }
 
 .tema-verde {
+  --c-bg: #d6ede0;
   --c-header-bg: #9fcaa8;
-  --c-app-bg: #d6ede0;
+  --c-footer-bg: #9ac7a8;
+  --c-summary-bg: #c7e6d2;
+  --c-card-bg: #ddf0e4;
+  --c-surface: #ffffff;
+  --c-soft: #e4f7ea;
+  --c-label-bg: #c3eed0;
   --c-accent: #8bc99e;
   --c-accent-hover: #79b68c;
-  --c-label-bg: #c3eed0;
   --c-input-bg: #e4f7ea;
   --c-input-border: #a9d8b8;
   --c-sidebar-btn: #bce4cb;
   --c-sidebar-btn-hover: #a9d8b8;
   --c-sidebar-btn-active: #94d4ab;
-  --c-footer-bg: #9ac7a8;
-  --c-summary-bg: #c7e6d2;
-  --c-card-bg: #ddf0e4;
   --c-title: #2f4a39;
+  --c-text: #222e26;
+  --c-muted: #5c7a68;
 }
 
 .tema-lila {
+  --c-bg: #e3d6ed;
   --c-header-bg: #b49fca;
-  --c-app-bg: #e3d6ed;
+  --c-footer-bg: #b09ac7;
+  --c-summary-bg: #ddc7e6;
+  --c-card-bg: #e8ddf0;
+  --c-surface: #ffffff;
+  --c-soft: #ece4f7;
+  --c-label-bg: #dcc3ee;
   --c-accent: #a98bc9;
   --c-accent-hover: #9779b6;
-  --c-label-bg: #dcc3ee;
   --c-input-bg: #ece4f7;
   --c-input-border: #c4a9d8;
   --c-sidebar-btn: #d2bce4;
   --c-sidebar-btn-hover: #c4a9d8;
   --c-sidebar-btn-active: #bf94d4;
-  --c-footer-bg: #b09ac7;
-  --c-summary-bg: #ddc7e6;
-  --c-card-bg: #e8ddf0;
   --c-title: #3a2f4a;
+  --c-text: #28222e;
+  --c-muted: #6b5c7a;
+}
+
+.tema-oscuro {
+  --c-bg: #1e1e24;
+  --c-header-bg: #2b2b34;
+  --c-footer-bg: #2b2b34;
+  --c-summary-bg: #26262e;
+  --c-card-bg: #2f2f38;
+  --c-surface: #2a2a32;
+  --c-soft: #34343c;
+  --c-label-bg: #3d3d47;
+  --c-accent: #c98b8b;
+  --c-accent-hover: #b67979;
+  --c-input-bg: #34343c;
+  --c-input-border: #4a4a55;
+  --c-sidebar-btn: #34343c;
+  --c-sidebar-btn-hover: #40404a;
+  --c-sidebar-btn-active: #4a4a55;
+  --c-title: #f0e6e6;
+  --c-text: #e8e8ee;
+  --c-muted: #a8a8b3;
 }

@@ -11,6 +11,7 @@ const TEMAS = [
   { id: "amarillo", nombre: "Amarillo", color: "#cabf9f" },
   { id: "verde", nombre: "Verde", color: "#9fcaa8" },
   { id: "lila", nombre: "Lila", color: "#b49fca" },
+  { id: "oscuro", nombre: "Oscuro", color: "#2b2b34" },
 ];
 
 function AdminPanel() {

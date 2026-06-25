@@ -319,7 +319,7 @@ def cambiar_logo_empresa(
     return {"mensaje": "Logo actualizado"}
 
 
-TEMAS_VALIDOS = ("rosa", "azul", "amarillo", "verde", "lila")
+TEMAS_VALIDOS = ("rosa", "azul", "amarillo", "verde", "lila", "oscuro")
 
 
 @app.put("/empresa/tema")

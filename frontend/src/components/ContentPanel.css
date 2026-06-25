@@ -1,13 +1,13 @@
 .content-panel {
   flex: 1;
-  background-color: #e4bcbc;
+  background-color: var(--c-sidebar-btn);
   border-radius: 30px;
   padding: 40px;
   min-height: 280px;
   text-align: center;
-  color: black;
+  color: var(--c-text);
   font-size: 20px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .fade-in {
@@ -17,7 +17,6 @@
 
 .fade-out {
   opacity: 0;
-  transfo
 }
 
 @media (max-width: 768px) {

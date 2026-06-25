@@ -1,24 +1,24 @@
-h3{
-    background-color: #f7e4e4;
+.form-container h3 {
+    background-color: var(--c-label-bg);
     padding: 5px 15px;
     font-size: 15px;
-    color: black;
+    color: var(--c-text);
     border-radius: 10px;
 }
 
 .deuda-card {
-    color: black;
+    color: var(--c-text);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #f7e4e4;
+    background-color: var(--c-soft);
     padding: 12px;
     border-radius: 12px;
     margin-bottom: 10px;
 }
 
 .deuda-card button {
-    background-color: #c98b8b;
+    background-color: var(--c-accent);
     border: none;
     padding: 8px 12px;
     border-radius: 10px;
@@ -27,5 +27,5 @@ h3{
 }
 
 .deuda-card button:hover {
-    background-color: #b67979;
+    background-color: var(--c-accent-hover);
 }

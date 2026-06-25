@@ -1,5 +1,5 @@
 .cliente-form-container {
-    background-color: #f7e4e4;
+    background-color: var(--c-soft);
     padding: 20px;
     border-radius: 18px;
     box-shadow: 0px 8px 18px rgba(0, 0, 0, 0.08);
@@ -8,8 +8,8 @@
 }
 
 .cliente-form-title {
-    background-color: #eec3c3;
-    color: black;
+    background-color: var(--c-label-bg);
+    color: var(--c-text);
     padding: 12px 15px;
     border-radius: 14px;
     font-weight: bold;
@@ -19,20 +19,21 @@
 .cliente-form-container label {
     font-weight: 600;
     margin-top: 8px;
-    color: #5a3e3e;
+    color: var(--c-title);
 }
 
 .cliente-form-container input {
     padding: 12px;
     border-radius: 14px;
-    border: 1px solid #d8a9a9;
-    background-color: #fff5f5;
+    border: 1px solid var(--c-input-border);
+    background-color: var(--c-input-bg);
+    color: var(--c-text);
     font-size: 14px;
     transition: 0.2s ease;
 }
 
 .cliente-form-container input:focus {
-    border-color: #c98b8b;
+    border-color: var(--c-accent);
     outline: none;
 }
 
@@ -41,7 +42,7 @@
     padding: 14px;
     border-radius: 14px;
     border: none;
-    background-color: #c98b8b;
+    background-color: var(--c-accent);
     color: white;
     font-weight: 600;
     cursor: pointer;
@@ -49,6 +50,6 @@
 }
 
 .cliente-form-container button:hover {
-    background-color: #b67979;
+    background-color: var(--c-accent-hover);
     transform: translateY(-2px);
 }

@@ -1,27 +1,23 @@
 .gastos-container {
     display: flex;
     flex-direction: column;
-    gap: 12px;
     gap: 10px;
-    color: black;
+    color: var(--c-text);
 }
 
 .gastos-title {
-    background-color: #eec3c3;
+    background-color: var(--c-label-bg);
     padding: 10px 15px;
-    
     border-radius: 12px;
     font-weight: bold;
-
 }
 
 .gasto-card {
-    background-color: #f7e4e4;
+    background-color: var(--c-soft);
     padding: 15px;
     border-radius: 15px;
     box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.08);
     transition: 0.2s ease;
-    
 }
 
 .gasto-card:hover {
@@ -42,7 +38,7 @@
 .gasto-fecha {
     margin-top: 6px;
     font-size: 12px;
-    color: #7a5c5c;
+    color: var(--c-muted);
 }
 
 .filtros {
@@ -54,13 +50,14 @@
 .filtros select {
     padding: 8px;
     border-radius: 10px;
-    border: 1px solid #d8a9a9;
-    background-color: #f7e4e4;
+    border: 1px solid var(--c-input-border);
+    background-color: var(--c-input-bg);
+    color: var(--c-text);
 }
 
 .btn-delete {
     margin-top: 8px;
-    background-color: #d88;
+    background-color: #d9534f;
     border: none;
     border-radius: 8px;
     padding: 6px 12px;
@@ -70,13 +67,13 @@
 }
 
 .btn-delete:hover {
-    background-color: #b55;
+    background-color: #c9302c;
 }
 
 .btn-edit {
     margin-top: 8px;
     margin-right: 8px;
-    background-color: #c98b8b;
+    background-color: var(--c-accent);
     border: none;
     border-radius: 10px;
     padding: 6px 14px;
@@ -88,7 +85,7 @@
 }
 
 .btn-edit:hover {
-    background-color: #b67979;
+    background-color: var(--c-accent-hover);
     transform: translateY(-2px);
 }
 
