@@ -9,29 +9,8 @@ function PeriodSelector({ periodo, setPeriodo }) {
   const anios = [];
   for (let a = 2024; a <= anioActual + 1; a++) anios.push(a);
 
-  const cambiarMes = (delta) => {
-    let mes = periodo.mes + delta;
-    let año = periodo.año;
-    if (mes < 1) {
-      mes = 12;
-      año -= 1;
-    } else if (mes > 12) {
-      mes = 1;
-      año += 1;
-    }
-    setPeriodo({ mes, año });
-  };
-
   return (
     <div className="periodo">
-      <button
-        className="periodo-arrow"
-        onClick={() => cambiarMes(-1)}
-        aria-label="Mes anterior"
-      >
-        ‹
-      </button>
-
       <select
         className="periodo-select"
         value={periodo.mes}
@@ -55,14 +34,6 @@ function PeriodSelector({ periodo, setPeriodo }) {
           </option>
         ))}
       </select>
-
-      <button
-        className="periodo-arrow"
-        onClick={() => cambiarMes(1)}
-        aria-label="Mes siguiente"
-      >
-        ›
-      </button>
     </div>
   );
 }
