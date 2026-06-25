@@ -15,9 +15,9 @@
 }
 
 .header-logo {
-  width: 110px;
+  width: 160px;
   height: auto;
-  max-height: 96px;
+  max-height: 140px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -71,8 +71,8 @@
   }
 
   .header-logo {
-    width: 70px;
-    max-height: 64px;
+    width: 100px;
+    max-height: 90px;
   }
 
   .header-title {
