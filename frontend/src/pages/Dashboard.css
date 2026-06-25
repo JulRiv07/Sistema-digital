@@ -1,5 +1,5 @@
 .main-area {
-  background-color: var(--c-app-bg);
+  background-color: var(--c-bg);
   display: grid;
   grid-template-columns: 300px 1fr;
   gap: 40px;
@@ -10,6 +10,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--c-bg);
 }
 
 .main-area {
