@@ -10,6 +10,7 @@ class Empresa(Base):
     nombre = Column(String, nullable=False)
     codigo = Column(String, nullable=False, unique=True, index=True)
     logo = Column(String, nullable=True)  # imagen en base64 (data URL)
+    tema = Column(String, nullable=True, server_default="rosa")
     creado_en = Column(DateTime(timezone=True), server_default=func.now())
 
 

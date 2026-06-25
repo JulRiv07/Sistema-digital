@@ -10,7 +10,7 @@
   align-items: center;
   gap: 12px;
 
-  background-color: #e4bcbc;
+  background-color: var(--c-sidebar-btn);
   color: black;
   border: none;
   padding: 20px;
@@ -21,12 +21,12 @@
 }
 
 .sidebar-button:hover {
-  background-color: #d8a9a9;
+  background-color: var(--c-sidebar-btn-hover);
   transform: scale(1.03);
 }
 
 .sidebar-button.active {
-  background-color: #d49494;
+  background-color: var(--c-sidebar-btn-active);
 }
 
 .button-icon {

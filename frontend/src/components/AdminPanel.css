@@ -64,15 +64,15 @@
   min-width: 200px;
   padding: 10px;
   border-radius: 12px;
-  border: 1px solid #d8a9a9;
-  background-color: #f7e4e4;
+  border: 1px solid var(--c-input-border);
+  background-color: var(--c-input-bg);
   color: black;
   font-size: 14px;
   outline: none;
 }
 
 .admin-btn {
-  background-color: #c98b8b;
+  background-color: var(--c-accent);
   color: white;
   border: none;
   border-radius: 12px;
@@ -82,7 +82,7 @@
   transition: 0.2s ease;
 }
 .admin-btn:hover {
-  background-color: #b67979;
+  background-color: var(--c-accent-hover);
 }
 
 .admin-logo-row {
@@ -117,6 +117,43 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.admin-temas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-tema {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #faf0f0;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-weight: 600;
+  color: #6b3f3f;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-tema:hover {
+  background: #f3e2e2;
+}
+
+.admin-tema.activo {
+  border-color: #7a4f4f;
+  background: #f3e2e2;
+}
+
+.admin-tema-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
 }
 
 .admin-btn-file {

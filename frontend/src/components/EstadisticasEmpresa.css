@@ -59,7 +59,7 @@
 
 .ge-barra {
   height: 100%;
-  background: linear-gradient(90deg, #c98b8b, #b67979);
+  background: linear-gradient(90deg, var(--c-accent), var(--c-accent-hover));
   border-radius: 8px;
   min-width: 2px;
   transition: width 0.4s ease;

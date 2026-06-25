@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./services/api"; // configura axios.defaults.baseURL al arrancar
 import "./index.css";
+import "./themes.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

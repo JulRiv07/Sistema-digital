@@ -57,6 +57,7 @@ class UsuarioOut(BaseModel):
     empresa_nombre: str | None = None
     empresa_codigo: str | None = None
     empresa_logo: str | None = None
+    empresa_tema: str | None = None
     rol: str
 
     class Config:
@@ -77,6 +78,10 @@ class LogoUpdate(BaseModel):
 class PasswordChange(BaseModel):
     actual: str
     nueva: str
+
+
+class TemaUpdate(BaseModel):
+    tema: str
 
 
 class TokenResponse(BaseModel):

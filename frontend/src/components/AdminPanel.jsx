@@ -5,6 +5,14 @@ import { leerImagenRedimensionada } from "../services/image";
 import Modal from "./Modal";
 import "./AdminPanel.css";
 
+const TEMAS = [
+  { id: "rosa", nombre: "Rosa", color: "#ca9f9f" },
+  { id: "azul", nombre: "Azul", color: "#9fb0ca" },
+  { id: "amarillo", nombre: "Amarillo", color: "#cabf9f" },
+  { id: "verde", nombre: "Verde", color: "#9fcaa8" },
+  { id: "lila", nombre: "Lila", color: "#b49fca" },
+];
+
 function AdminPanel() {
   const { usuario, refrescarUsuario, cerrarSesion } = useAuth();
 
@@ -81,6 +89,16 @@ function AdminPanel() {
     }
   };
 
+  const cambiarTema = async (id) => {
+    try {
+      await axios.put("/empresa/tema", { tema: id });
+      await refrescarUsuario();
+      aviso("Tema actualizado ✅");
+    } catch (err) {
+      aviso(err.response?.data?.detail || "No se pudo cambiar el tema");
+    }
+  };
+
   const regenerarCodigo = async () => {
     if (!window.confirm("¿Generar un código nuevo? El anterior dejará de funcionar.")) return;
     try {
@@ -144,6 +162,26 @@ function AdminPanel() {
               </button>
             )}
           </div>
+        </div>
+      </section>
+
+      {/* Tema / paleta de colores */}
+      <section className="admin-card">
+        <h3>Color de la empresa</h3>
+        <p className="admin-desc">
+          Elige una paleta. Cambia el color de toda la app (el login se queda igual).
+        </p>
+        <div className="admin-temas">
+          {TEMAS.map((t) => (
+            <button
+              key={t.id}
+              className={`admin-tema ${usuario?.empresa_tema === t.id ? "activo" : ""}`}
+              onClick={() => cambiarTema(t.id)}
+            >
+              <span className="admin-tema-swatch" style={{ background: t.color }} />
+              {t.nombre}
+            </button>
+          ))}
         </div>
       </section>
 

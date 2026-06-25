@@ -53,6 +53,7 @@ def usuario_payload(usuario: Usuario, db: Session) -> dict:
         "empresa_nombre": empresa.nombre if empresa else None,
         "empresa_codigo": empresa.codigo if empresa else None,
         "empresa_logo": empresa.logo if empresa else None,
+        "empresa_tema": (empresa.tema or "rosa") if empresa else "rosa",
         "rol": usuario.rol,
     }
 
@@ -316,6 +317,25 @@ def cambiar_logo_empresa(
     empresa.logo = datos.logo or None
     db.commit()
     return {"mensaje": "Logo actualizado"}
+
+
+TEMAS_VALIDOS = ("rosa", "azul", "amarillo", "verde", "lila")
+
+
+@app.put("/empresa/tema")
+def cambiar_tema_empresa(
+    datos: schemas.TemaUpdate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+    tema = (datos.tema or "").strip().lower()
+    if tema not in TEMAS_VALIDOS:
+        raise HTTPException(status_code=400, detail="Tema inválido")
+    empresa = db.query(Empresa).filter(Empresa.id == usuario.empresa_id).first()
+    empresa.tema = tema
+    db.commit()
+    return {"mensaje": "Tema actualizado", "tema": tema}
 
 
 @app.get("/empresa/empleados/{usuario_id}/estadisticas")

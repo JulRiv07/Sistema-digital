@@ -11,7 +11,7 @@
   font-weight: 500;
   padding: 6px 10px;
   border-radius: 10px;
-  background-color: #eec3c3;
+  background-color: var(--c-label-bg);
 }
 
 /* Inputs y selects */
@@ -19,8 +19,8 @@
 .form-container select {
   padding: 10px;
   border-radius: 12px;
-  border: 1px solid #d8a9a9;
-  background-color: #f7e4e4;
+  border: 1px solid var(--c-input-border);
+  background-color: var(--c-input-bg);
   color: black;
   font-size: 14px;
   outline: none;
@@ -29,7 +29,7 @@
 /* Focus */
 .form-container input:focus,
 .form-container select:focus {
-  border-color: #c98b8b;
+  border-color: var(--c-accent);
 }
 
 /* Evita el fondo gris/azul que el navegador pone al autocompletar */
@@ -37,8 +37,8 @@
 .form-container input:-webkit-autofill:hover,
 .form-container input:-webkit-autofill:focus {
   -webkit-text-fill-color: #000;
-  -webkit-box-shadow: 0 0 0 1000px #f7e4e4 inset;
-  box-shadow: 0 0 0 1000px #f7e4e4 inset;
+  -webkit-box-shadow: 0 0 0 1000px var(--c-input-bg) inset;
+  box-shadow: 0 0 0 1000px var(--c-input-bg) inset;
   transition: background-color 9999s ease-in-out 0s;
 }
 
@@ -46,7 +46,7 @@
 .form-container button {
   margin-top: 10px;
   padding: 12px;
-  background-color: #c98b8b;
+  background-color: var(--c-accent);
   border: none;
   border-radius: 12px;
   cursor: pointer;
@@ -56,5 +56,5 @@
 }
 
 .form-container button:hover {
-    background-color: #b67979;
+    background-color: var(--c-accent-hover);
 }

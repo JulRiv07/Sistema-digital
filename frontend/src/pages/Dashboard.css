@@ -1,5 +1,5 @@
 .main-area {
-  background-color: #edd6d6;
+  background-color: var(--c-app-bg);
   display: grid;
   grid-template-columns: 300px 1fr;
   gap: 40px;

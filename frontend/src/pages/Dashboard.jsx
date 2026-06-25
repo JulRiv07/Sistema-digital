@@ -12,12 +12,13 @@ function Dashboard() {
   const { usuario } = useAuth();
   const puedeOperar = usuario?.rol === "empleado" || usuario?.rol === "propietaria";
   const seccionInicial = puedeOperar ? "venta" : "estadisticas";
+  const tema = usuario?.empresa_tema || "rosa";
 
   const [activeSection, setActiveSection] = useState(seccionInicial);
   const [selectedCliente, setSelectedCliente] = useState(null);
 
   return (
-    <div className="dashboard-container">
+    <div className={`dashboard-container tema-${tema}`}>
       <Header />
 
       <SummaryCards key={activeSection} />
