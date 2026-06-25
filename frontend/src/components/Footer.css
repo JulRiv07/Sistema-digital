@@ -5,4 +5,18 @@
   font-weight: 500;
   letter-spacing: 1px;
   padding: 15px 60px;
+  color: var(--c-title);
+}
+
+.footer-frase {
+  font-style: italic;
+  font-weight: 600;
+  font-size: 15px;
+  margin: 0 0 8px;
+}
+
+.footer-info {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.85;
 }
