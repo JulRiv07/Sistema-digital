@@ -54,7 +54,7 @@ function ClienteForm({ onClienteCreado }) {
                 type="text"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
-                placeholder="Ej: Tienda Batallón"
+                placeholder="Ej: Tienda Don Pedro"
             />
 
             <label>Teléfono</label>
