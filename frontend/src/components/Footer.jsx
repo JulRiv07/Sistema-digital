@@ -34,7 +34,7 @@ function Footer() {
 
   return (
     <footer className="footer">
-      <p className="footer-frase">✨ {frase}</p>
+      <p className="footer-frase"> {frase}</p>
 
       {esPrincipal ? (
         <p className="footer-info">
