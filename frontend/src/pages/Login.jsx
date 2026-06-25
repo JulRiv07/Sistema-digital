@@ -11,6 +11,7 @@ function Login({ irARegistro }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
+  const [usuarioSoloLectura, setUsuarioSoloLectura] = useState(true);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,6 +48,8 @@ function Login({ irARegistro }) {
             onChange={(e) => setUsername(e.target.value)}
             placeholder="tu nombre de usuario"
             autoComplete="off"
+            readOnly={usuarioSoloLectura}
+            onFocus={() => setUsuarioSoloLectura(false)}
           />
 
           <label>Contraseña</label>

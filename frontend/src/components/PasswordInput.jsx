@@ -36,8 +36,9 @@ function EyeOffIcon() {
   );
 }
 
-function PasswordInput({ value, onChange, placeholder = "••••••••", autoComplete = "off" }) {
+function PasswordInput({ value, onChange, placeholder = "••••••••", autoComplete = "new-password" }) {
   const [ver, setVer] = useState(false);
+  const [soloLectura, setSoloLectura] = useState(true);
 
   return (
     <div className="password-field">
@@ -47,6 +48,8 @@ function PasswordInput({ value, onChange, placeholder = "•••••••�
         onChange={onChange}
         placeholder={placeholder}
         autoComplete={autoComplete}
+        readOnly={soloLectura}
+        onFocus={() => setSoloLectura(false)}
       />
       <button
         type="button"
