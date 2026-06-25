@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { login } from "../services/api";
+import PasswordInput from "../components/PasswordInput";
 import "./Auth.css";
 
 function Login({ irARegistro }) {
@@ -48,11 +49,9 @@ function Login({ irARegistro }) {
           />
 
           <label>Contraseña</label>
-          <input
-            type="password"
+          <PasswordInput
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
           />
 
           {error && <p className="auth-error">{error}</p>}

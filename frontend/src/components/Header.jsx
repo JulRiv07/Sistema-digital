@@ -14,21 +14,11 @@ function Header() {
   return (
     <header className="header">
       <div className="header-brand">
-        {esPrincipal && (
-          <img src={Logo} alt="Logo" className="header-logo" />
-        )}
+        {esPrincipal && <img src={Logo} alt="Logo" className="header-logo" />}
         <h1 className="header-title">{empresaNombre}</h1>
       </div>
 
       <div className="header-user">
-        {usuario?.rol === "admin" && usuario?.empresa_codigo && (
-          <span
-            className="header-codigo"
-            title="Comparte este código con tus empleados para que se unan a tu empresa"
-          >
-            Código: {usuario.empresa_codigo}
-          </span>
-        )}
         {usuario && <span className="header-username">{usuario.nombre}</span>}
         <button className="header-logout" onClick={cerrarSesion}>
           Cerrar sesión

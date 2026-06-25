@@ -1,4 +1,5 @@
 import "./Sidebar.css";
+import { useAuth } from "../context/AuthContext";
 
 import plus from "../assets/icons/plus.png";
 import coin from "../assets/icons/coin.png";
@@ -11,6 +12,9 @@ import money from "../assets/icons/money.png";
 import saving from "../assets/icons/saving.png";
 
 function Sidebar({ activeSection, setActiveSection }) {
+
+  const { usuario } = useAuth();
+  const esAdmin = usuario?.rol === "admin";
 
   return (
     <div className="sidebar">
@@ -82,6 +86,16 @@ function Sidebar({ activeSection, setActiveSection }) {
         <img src={saving} className="button-icon" />
         Ver gastos
       </button>
+
+      {esAdmin && (
+        <button
+          className={`sidebar-button ${activeSection === "admin" ? "active" : ""}`}
+          onClick={() => setActiveSection("admin")}
+        >
+          <img src={cliente} className="button-icon" />
+          Administración
+        </button>
+      )}
 
     </div>
   );

@@ -117,7 +117,7 @@ def registro(datos: schemas.RegistroRequest, db: Session = Depends(get_db)):
         ).first()
         if not empresa:
             raise HTTPException(status_code=404, detail="No existe una empresa con ese código")
-        rol = "usuario"
+        rol = "empleado"
 
     usuario = Usuario(
         empresa_id=empresa.id,
@@ -151,6 +151,94 @@ def login(datos: schemas.LoginRequest, db: Session = Depends(get_db)):
 @app.get("/me", response_model=schemas.UsuarioOut)
 def me(usuario: Usuario = Depends(get_usuario_actual), db: Session = Depends(get_db)):
     return usuario_payload(usuario, db)
+
+
+# ===================== ADMINISTRACIÓN DE EMPRESA (solo admin) =====================
+
+def requiere_admin(usuario: Usuario):
+    if usuario.rol != "admin":
+        raise HTTPException(status_code=403, detail="Solo el empresario puede hacer esto")
+
+
+@app.get("/empresa/empleados", response_model=list[schemas.EmpleadoOut])
+def listar_empleados(
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+    return db.query(Usuario)\
+        .filter(Usuario.empresa_id == usuario.empresa_id)\
+        .order_by(Usuario.id)\
+        .all()
+
+
+@app.put("/empresa/nombre")
+def cambiar_nombre_empresa(
+    datos: schemas.EmpresaNombreUpdate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+    if not datos.nombre or not datos.nombre.strip():
+        raise HTTPException(status_code=400, detail="El nombre no puede estar vacío")
+
+    empresa = db.query(Empresa).filter(Empresa.id == usuario.empresa_id).first()
+    empresa.nombre = datos.nombre.strip()
+    db.commit()
+    db.refresh(empresa)
+    return {"mensaje": "Nombre actualizado", "nombre": empresa.nombre}
+
+
+@app.put("/empresa/empleados/{usuario_id}/rol")
+def cambiar_rol_empleado(
+    usuario_id: int,
+    datos: schemas.RolUpdate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+    nuevo_rol = (datos.rol or "").strip().lower()
+    if nuevo_rol not in ("admin", "empleado"):
+        raise HTTPException(status_code=400, detail="Rol inválido")
+
+    miembro = db.query(Usuario).filter(
+        Usuario.id == usuario_id,
+        Usuario.empresa_id == usuario.empresa_id,
+    ).first()
+    if not miembro:
+        raise HTTPException(status_code=404, detail="Empleado no encontrado")
+
+    # No dejar la empresa sin ningún empresario
+    if miembro.rol == "admin" and nuevo_rol != "admin":
+        admins = db.query(Usuario).filter(
+            Usuario.empresa_id == usuario.empresa_id,
+            Usuario.rol == "admin",
+        ).count()
+        if admins <= 1:
+            raise HTTPException(status_code=400, detail="Debe quedar al menos un empresario")
+
+    miembro.rol = nuevo_rol
+    db.commit()
+    return {"mensaje": "Rol actualizado"}
+
+
+@app.delete("/empresa")
+def eliminar_empresa(
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+    emp = usuario.empresa_id
+
+    # Borrar en orden seguro por las llaves foráneas
+    db.query(Pago).filter(Pago.empresa_id == emp).delete()
+    db.query(Venta).filter(Venta.empresa_id == emp).delete()
+    db.query(Gasto).filter(Gasto.empresa_id == emp).delete()
+    db.query(Cliente).filter(Cliente.empresa_id == emp).delete()
+    db.query(Usuario).filter(Usuario.empresa_id == emp).delete()
+    db.query(Empresa).filter(Empresa.id == emp).delete()
+    db.commit()
+    return {"mensaje": "Empresa eliminada"}
 
 
 # ===================== CLIENTES =====================

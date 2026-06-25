@@ -40,8 +40,19 @@ export function AuthProvider({ children }) {
     setUsuario(null);
   };
 
+  const refrescarUsuario = async () => {
+    try {
+      const res = await axios.get("/me");
+      setUsuario(res.data);
+    } catch {
+      // si falla, no rompemos la sesión actual
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ usuario, cargando, iniciarSesion, cerrarSesion }}>
+    <AuthContext.Provider
+      value={{ usuario, cargando, iniciarSesion, cerrarSesion, refrescarUsuario }}
+    >
       {children}
     </AuthContext.Provider>
   );

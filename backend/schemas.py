@@ -65,3 +65,22 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     usuario: UsuarioOut
+
+
+class EmpresaNombreUpdate(BaseModel):
+    nombre: str
+
+
+class RolUpdate(BaseModel):
+    rol: str
+
+
+class EmpleadoOut(BaseModel):
+    id: int
+    nombre: str
+    username: str
+    email: str | None = None
+    rol: str
+
+    class Config:
+        from_attributes = True

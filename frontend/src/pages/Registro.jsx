@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { registro } from "../services/api";
+import PasswordInput from "../components/PasswordInput";
 import "./Auth.css";
 
 function passwordValida(p) {
@@ -80,7 +81,7 @@ function Registro({ irALogin }) {
             className={tipo === "usuario" ? "active" : ""}
             onClick={() => setTipo("usuario")}
           >
-            Usuario de empresa
+            Soy empleado
           </button>
         </div>
 
@@ -98,7 +99,7 @@ function Registro({ irALogin }) {
                 type="text"
                 value={empresaNombre}
                 onChange={(e) => setEmpresaNombre(e.target.value)}
-                placeholder="Ej: Postres Juli"
+                placeholder="Ej: Mi Empresa"
               />
             </>
           ) : (
@@ -118,7 +119,7 @@ function Registro({ irALogin }) {
             type="text"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            placeholder="Ej: Juliana"
+            placeholder="Ej: Ana Pérez"
           />
 
           <label>Nombre de usuario</label>
@@ -126,7 +127,7 @@ function Registro({ irALogin }) {
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Ej: juliana"
+            placeholder="Ej: anaperez"
           />
 
           <label>Correo (opcional)</label>
@@ -138,11 +139,9 @@ function Registro({ irALogin }) {
           />
 
           <label>Contraseña</label>
-          <input
-            type="password"
+          <PasswordInput
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
           />
           <p className="auth-hint">Mínimo 8 caracteres, con letras y números.</p>
 

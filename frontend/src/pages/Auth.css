@@ -86,6 +86,37 @@
   color: #a87d7d;
 }
 
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-field input {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 44px;
+}
+
+.password-field .password-toggle {
+  position: absolute;
+  right: 6px;
+  margin: 0;
+  padding: 4px 6px;
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.password-field .password-toggle:hover {
+  background: none;
+}
+
 .auth-error {
   color: #b04a4a;
   background: #f7e0e0;

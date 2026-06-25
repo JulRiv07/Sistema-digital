@@ -1,0 +1,166 @@
+.admin-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.admin-title {
+  color: #6b3f3f;
+  margin: 0;
+}
+
+.admin-aviso {
+  background: #f3e2e2;
+  color: #7a4f4f;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+}
+
+.admin-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 6px 18px rgba(168, 120, 120, 0.15);
+}
+
+.admin-card h3 {
+  margin: 0 0 8px;
+  color: #7a4f4f;
+}
+
+.admin-desc {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #8a6f6f;
+}
+
+.admin-codigo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-codigo {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #b6603f;
+  background: #faf0f0;
+  padding: 8px 16px;
+  border-radius: 10px;
+}
+
+.admin-inline {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-inline input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #d8a9a9;
+  background-color: #f7e4e4;
+  color: black;
+  font-size: 14px;
+  outline: none;
+}
+
+.admin-btn {
+  background-color: #c98b8b;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.admin-btn:hover {
+  background-color: #b67979;
+}
+
+.admin-empleado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0e0e0;
+  flex-wrap: wrap;
+}
+.admin-empleado:last-child {
+  border-bottom: none;
+}
+
+.admin-empleado-info {
+  display: flex;
+  flex-direction: column;
+}
+.admin-empleado-nombre {
+  font-weight: 600;
+  color: #5a3a3a;
+}
+.admin-empleado-user {
+  font-size: 13px;
+  color: #a07f7f;
+}
+
+.admin-empleado-acciones {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-rol {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.admin-rol-admin {
+  background: #e7d2a8;
+  color: #7a5a1f;
+}
+.admin-rol-empleado {
+  background: #e4d4d4;
+  color: #6b5151;
+}
+
+.admin-btn-mini {
+  background: #efdada;
+  color: #7a4f4f;
+  border: none;
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.admin-btn-mini:hover {
+  background: #e5c9c9;
+}
+
+.admin-peligro {
+  border: 1px solid #e3b3b3;
+}
+
+.admin-btn-peligro {
+  background-color: #c0392b;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.admin-btn-peligro:hover {
+  background-color: #a52f23;
+}

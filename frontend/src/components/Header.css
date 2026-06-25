@@ -1,10 +1,10 @@
 .header {
   background-color: #CA9F9F;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 40px;
+  gap: 6px;
+  padding: 14px 40px;
 }
 
 .header-brand {
@@ -15,36 +15,26 @@
 }
 
 .header-logo {
-  width: 80px;
+  width: 70px;
   height: auto;
   flex-shrink: 0;
 }
 
 .header-title {
-  font-size: 38px;
+  font-size: 40px;
   font-weight: bold;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: #4a2f2f;
   margin: 0;
   line-height: 1.1;
+  text-align: center;
 }
 
 .header-user {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-shrink: 0;
-}
-
-.header-codigo {
-  background-color: #f3e2e2;
-  color: #7a4f4f;
-  font-weight: 700;
-  font-size: 13px;
-  padding: 6px 10px;
-  border-radius: 10px;
-  white-space: nowrap;
 }
 
 .header-username {
@@ -57,7 +47,7 @@
   color: white;
   border: none;
   border-radius: 10px;
-  padding: 8px 14px;
+  padding: 7px 14px;
   font-weight: bold;
   cursor: pointer;
   transition: 0.2s ease;
@@ -71,8 +61,7 @@
 /* 📱 Mobile */
 @media (max-width: 768px) {
   .header {
-    padding: 10px 16px;
-    gap: 10px;
+    padding: 12px 16px;
   }
 
   .header-brand {
@@ -80,25 +69,20 @@
   }
 
   .header-logo {
-    width: 50px;
+    width: 48px;
   }
 
   .header-title {
-    font-size: 21px;
+    font-size: 24px;
     letter-spacing: 1px;
   }
 
-  .header-codigo {
-    font-size: 11px;
-    padding: 5px 8px;
-  }
-
   .header-username {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .header-logout {
-    padding: 7px 11px;
+    padding: 6px 12px;
     font-size: 13px;
   }
 }

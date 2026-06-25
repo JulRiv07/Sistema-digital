@@ -7,6 +7,7 @@ import ClientesPanel from "./ClientesPanel";
 import VentasList from "./VentasList";
 import PagosList from "./PagosList";
 import GastosList from "./GastosList";
+import AdminPanel from "./AdminPanel";
 
 function ContentPanel({
   activeSection,
@@ -49,6 +50,9 @@ function ContentPanel({
 
       case "verGastos":
         return <GastosList />;
+
+      case "admin":
+        return <AdminPanel />;
 
     default:
       return <h4>Selecciona una opción</h4>;
