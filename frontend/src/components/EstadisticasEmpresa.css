@@ -1,0 +1,115 @@
+.ge-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.ge-title {
+  color: #6b3f3f;
+  margin: 0;
+}
+
+.ge-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 6px 18px rgba(168, 120, 120, 0.15);
+}
+
+.ge-card h3 {
+  margin: 0 0 14px;
+  color: #7a4f4f;
+}
+
+.ge-vacio {
+  color: #a07f7f;
+  margin: 0;
+}
+
+/* Gráfica de barras */
+.ge-grafica {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ge-fila {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.ge-label {
+  font-size: 14px;
+  color: #5a3a3a;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ge-barra-bg {
+  background: #f1e0e0;
+  border-radius: 8px;
+  height: 18px;
+  overflow: hidden;
+}
+
+.ge-barra {
+  height: 100%;
+  background: linear-gradient(90deg, #c98b8b, #b67979);
+  border-radius: 8px;
+  min-width: 2px;
+  transition: width 0.4s ease;
+}
+
+.ge-valor {
+  font-size: 13px;
+  font-weight: 700;
+  color: #6b3f3f;
+  white-space: nowrap;
+}
+
+/* Detalle por persona */
+.ge-persona {
+  padding: 14px 0;
+  border-bottom: 1px solid #f0e0e0;
+}
+.ge-persona:last-child {
+  border-bottom: none;
+}
+
+.ge-persona-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.ge-persona-nombre {
+  font-weight: 700;
+  color: #5a3a3a;
+}
+
+.ge-rol {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.ge-rol-admin {
+  background: #e7d2a8;
+  color: #7a5a1f;
+}
+.ge-rol-empleado {
+  background: #e4d4d4;
+  color: #6b5151;
+}
+
+@media (max-width: 768px) {
+  .ge-fila {
+    grid-template-columns: 80px 1fr auto;
+  }
+}

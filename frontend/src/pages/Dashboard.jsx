@@ -1,5 +1,6 @@
 import "./Dashboard.css";
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import Header from "../components/Header";
 import SummaryCards from "../components/SummaryCards";
 import Sidebar from "../components/Sidebar";
@@ -8,7 +9,10 @@ import Footer from "../components/Footer";
 
 function Dashboard() {
 
-  const [activeSection, setActiveSection] = useState("venta");
+  const { usuario } = useAuth();
+  const seccionInicial = usuario?.rol === "admin" ? "estadisticas" : "venta";
+
+  const [activeSection, setActiveSection] = useState(seccionInicial);
   const [selectedCliente, setSelectedCliente] = useState(null);
 
   return (

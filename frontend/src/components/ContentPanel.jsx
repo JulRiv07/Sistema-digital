@@ -9,6 +9,7 @@ import PagosList from "./PagosList";
 import GastosList from "./GastosList";
 import AdminPanel from "./AdminPanel";
 import PerfilPanel from "./PerfilPanel";
+import EstadisticasEmpresa from "./EstadisticasEmpresa";
 
 function ContentPanel({
   activeSection,
@@ -57,6 +58,9 @@ function ContentPanel({
 
       case "perfil":
         return <PerfilPanel />;
+
+      case "estadisticas":
+        return <EstadisticasEmpresa />;
 
     default:
       return <h4>Selecciona una opción</h4>;

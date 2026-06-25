@@ -16,94 +16,53 @@ function Sidebar({ activeSection, setActiveSection }) {
   const { usuario } = useAuth();
   const esAdmin = usuario?.rol === "admin";
 
+  const Boton = ({ seccion, icono, children, iconoActivo }) => (
+    <button
+      className={`sidebar-button ${activeSection === seccion ? "active" : ""}`}
+      onClick={() => setActiveSection(seccion)}
+    >
+      <img
+        src={iconoActivo && activeSection === seccion ? iconoActivo : icono}
+        className="button-icon"
+      />
+      {children}
+    </button>
+  );
+
   return (
     <div className="sidebar">
 
-      <button
-        className={`sidebar-button ${activeSection === "venta" ? "active" : ""}`}
-        onClick={() => setActiveSection("venta")}
-      >
-        <img src={plus} className="button-icon" />
-        Ingresar venta
-      </button>
-
-      <button
-        className={`sidebar-button ${activeSection === "pago" ? "active" : ""}`}
-        onClick={() => setActiveSection("pago")}
-      >
-        <img src={coin} className="button-icon" />
-        Ingresar pago
-      </button>
-
-      <button
-        className={`sidebar-button ${activeSection === "gasto" ? "active" : ""}`}
-        onClick={() => setActiveSection("gasto")}
-      >
-        <img
-          src={activeSection === "gasto" ? bravoIcon : happyFace}
-          className="button-icon"
-        />
-        Ingresar gasto
-      </button>
-
-      <button
-        className={`sidebar-button ${activeSection === "deuda" ? "active" : ""}`}
-        onClick={() => setActiveSection("deuda")}
-      >
-        <img src={accounting} className="button-icon" />
-        Deudas actuales
-      </button>
-
-      <button
-        className={`sidebar-button ${activeSection === "clientes" ? "active" : ""}`}
-        onClick={() => setActiveSection("clientes")}
-      >
-        <img src={cliente} className="button-icon" />
-        Clientes
-      </button>
-
-
-      <button
-        className="sidebar-button"
-        onClick={() => setActiveSection("verVentas")}
-      >
-        <img src={memo} className="button-icon" />
-        Ver ventas
-      </button>
-
-      <button
-        className="sidebar-button"
-        onClick={() => setActiveSection("verPagos")}
-      >
-        <img src={money} className="button-icon" />
-        Ver pagos
-      </button>
-
-      <button
-        className="sidebar-button"
-        onClick={() => setActiveSection("verGastos")}
-      >
-        <img src={saving} className="button-icon" />
-        Ver gastos
-      </button>
-
-      <button
-        className={`sidebar-button ${activeSection === "perfil" ? "active" : ""}`}
-        onClick={() => setActiveSection("perfil")}
-      >
-        <img src={cliente} className="button-icon" />
-        Mi perfil
-      </button>
-
-      {esAdmin && (
-        <button
-          className={`sidebar-button ${activeSection === "admin" ? "active" : ""}`}
-          onClick={() => setActiveSection("admin")}
-        >
-          <img src={cliente} className="button-icon" />
-          Administración
-        </button>
+      {/* Operación: solo empleados */}
+      {!esAdmin && (
+        <>
+          <Boton seccion="venta" icono={plus}>Ingresar venta</Boton>
+          <Boton seccion="pago" icono={coin}>Ingresar pago</Boton>
+          <Boton seccion="deuda" icono={accounting}>Deudas actuales</Boton>
+        </>
       )}
+
+      {/* Gastos: solo empresario */}
+      {esAdmin && (
+        <Boton seccion="gasto" icono={happyFace} iconoActivo={bravoIcon}>
+          Ingresar gasto
+        </Boton>
+      )}
+
+      {/* Comunes a los dos roles */}
+      <Boton seccion="clientes" icono={cliente}>Clientes</Boton>
+      <Boton seccion="verVentas" icono={memo}>Ver ventas</Boton>
+      <Boton seccion="verPagos" icono={money}>Ver pagos</Boton>
+      <Boton seccion="verGastos" icono={saving}>Ver gastos</Boton>
+
+      {/* Solo empresario */}
+      {esAdmin && (
+        <>
+          <Boton seccion="estadisticas" icono={memo}>Estadísticas</Boton>
+          <Boton seccion="admin" icono={cliente}>Administración</Boton>
+        </>
+      )}
+
+      <Boton seccion="perfil" icono={cliente}>Mi perfil</Boton>
 
     </div>
   );

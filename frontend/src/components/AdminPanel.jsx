@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { leerImagenRedimensionada } from "../services/image";
-import Estadisticas from "./Estadisticas";
 import Modal from "./Modal";
 import "./AdminPanel.css";
 
@@ -14,9 +13,6 @@ function AdminPanel() {
   const [mensaje, setMensaje] = useState("");
   const [modalEliminar, setModalEliminar] = useState(false);
   const [copiado, setCopiado] = useState(false);
-
-  const [expandido, setExpandido] = useState(null);
-  const [statsEmp, setStatsEmp] = useState({});
 
   const cargarEmpleados = () => {
     axios
@@ -83,23 +79,6 @@ function AdminPanel() {
     } catch (err) {
       aviso(err.response?.data?.detail || "No se pudo cambiar el rol");
     }
-  };
-
-  const verStats = async (emp) => {
-    if (expandido === emp.id) {
-      setExpandido(null);
-      return;
-    }
-    if (!statsEmp[emp.id]) {
-      try {
-        const r = await axios.get(`/empresa/empleados/${emp.id}/estadisticas`);
-        setStatsEmp((prev) => ({ ...prev, [emp.id]: r.data }));
-      } catch {
-        aviso("No se pudieron cargar las estadísticas");
-        return;
-      }
-    }
-    setExpandido(emp.id);
   };
 
   const eliminarEmpresa = async () => {
@@ -189,9 +168,6 @@ function AdminPanel() {
               </div>
               <div className="admin-empleado-acciones">
                 <span className={`admin-rol admin-rol-${emp.rol}`}>{rolLabel(emp.rol)}</span>
-                <button className="admin-btn-mini" onClick={() => verStats(emp)}>
-                  {expandido === emp.id ? "Ocultar" : "Estadísticas"}
-                </button>
                 {emp.id !== usuario?.id &&
                   (emp.rol === "empleado" ? (
                     <button className="admin-btn-mini" onClick={() => cambiarRol(emp, "admin")}>
@@ -204,11 +180,6 @@ function AdminPanel() {
                   ))}
               </div>
             </div>
-            {expandido === emp.id && (
-              <div className="admin-empleado-stats">
-                <Estadisticas stats={statsEmp[emp.id]} />
-              </div>
-            )}
           </div>
         ))}
       </section>

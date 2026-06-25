@@ -15,12 +15,15 @@ function PerfilPanel() {
   const [error, setError] = useState("");
   const [stats, setStats] = useState(null);
 
+  const esAdmin = usuario?.rol === "admin";
+
   useEffect(() => {
+    if (esAdmin) return; // el empresario no registra ventas, no tiene stats propias
     axios
       .get("/perfil/estadisticas")
       .then((r) => setStats(r.data))
       .catch(() => {});
-  }, []);
+  }, [esAdmin]);
 
   const guardar = async (e) => {
     e.preventDefault();
@@ -77,10 +80,12 @@ function PerfilPanel() {
         </form>
       </section>
 
-      <section className="perfil-card">
-        <h3>Mis estadísticas</h3>
-        <Estadisticas stats={stats} />
-      </section>
+      {!esAdmin && (
+        <section className="perfil-card">
+          <h3>Mis estadísticas</h3>
+          <Estadisticas stats={stats} />
+        </section>
+      )}
     </div>
   );
 }

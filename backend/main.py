@@ -242,6 +242,34 @@ def requiere_admin(usuario: Usuario):
         raise HTTPException(status_code=403, detail="Solo el empresario puede hacer esto")
 
 
+def requiere_empleado(usuario: Usuario):
+    if usuario.rol != "empleado":
+        raise HTTPException(status_code=403, detail="Esta acción es solo para empleados")
+
+
+@app.get("/empresa/estadisticas")
+def estadisticas_empresa(
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+    miembros = db.query(Usuario)\
+        .filter(Usuario.empresa_id == usuario.empresa_id)\
+        .order_by(Usuario.id)\
+        .all()
+    resultado = []
+    for m in miembros:
+        stats = estadisticas_usuario(db, usuario.empresa_id, m.id)
+        resultado.append({
+            "id": m.id,
+            "nombre": m.nombre,
+            "username": m.username,
+            "rol": m.rol,
+            **stats,
+        })
+    return resultado
+
+
 @app.get("/empresa/empleados", response_model=list[schemas.EmpleadoOut])
 def listar_empleados(
     db: Session = Depends(get_db),
@@ -388,6 +416,7 @@ def crear_venta(
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_usuario_actual),
 ):
+    requiere_empleado(usuario)
     cliente = db.query(Cliente).filter(
         Cliente.id == venta.cliente_id,
         Cliente.empresa_id == usuario.empresa_id,
@@ -502,6 +531,7 @@ def registrar_pago(
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_usuario_actual),
 ):
+    requiere_empleado(usuario)
     cliente = db.query(Cliente).filter(
         Cliente.id == pago.cliente_id,
         Cliente.empresa_id == usuario.empresa_id,
@@ -565,6 +595,7 @@ def crear_gasto(
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_usuario_actual),
 ):
+    requiere_admin(usuario)
     nuevo_gasto = Gasto(
         empresa_id=usuario.empresa_id,
         usuario_id=usuario.id,
@@ -886,6 +917,7 @@ def editar_gasto(
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_usuario_actual),
 ):
+    requiere_admin(usuario)
     gasto = db.query(Gasto).filter(
         Gasto.id == gasto_id,
         Gasto.empresa_id == usuario.empresa_id,
@@ -907,6 +939,7 @@ def eliminar_gasto(
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_usuario_actual),
 ):
+    requiere_admin(usuario)
     gasto = db.query(Gasto).filter(
         Gasto.id == gasto_id,
         Gasto.empresa_id == usuario.empresa_id,
