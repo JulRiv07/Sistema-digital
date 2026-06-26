@@ -101,10 +101,16 @@ function VentasList() {
             cargarVentas();
         } catch (error) {
             console.error("Error al eliminar venta:", error);
-            alert(
-                error.response?.data?.detail ||
-                "No se pudo eliminar la venta. Revisa tu conexión o vuelve a iniciar sesión."
-            );
+            const status = error.response?.status;
+            const detalle = error.response?.data?.detail;
+            if (status) {
+                alert(`No se pudo eliminar. Código ${status}. ${detalle || ""}`);
+            } else {
+                alert(
+                    "No hubo respuesta del servidor (puede estar despertando en Render). " +
+                    "Espera ~30 segundos y vuelve a intentar. Detalle: " + (error.message || "desconocido")
+                );
+            }
         }
     };
 
