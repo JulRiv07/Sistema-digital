@@ -132,7 +132,8 @@ function AdminPanel() {
     }
   };
 
-  const rolLabel = (rol) => (rol === "admin" ? "Empresario" : "Empleado");
+  const rolLabel = (rol) =>
+    rol === "admin" ? "Empresario" : rol === "propietaria" ? "Propietario" : "Empleado";
 
   return (
     <div className="admin-panel">

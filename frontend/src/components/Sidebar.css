@@ -1,7 +1,9 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  gap: 35px;
+  gap: 20px;
+  width: 280px;
+  flex-shrink: 0;
 }
 
 /* Botones */
@@ -36,6 +38,7 @@
 
 @media (max-width: 768px) {
   .sidebar {
+    width: 100%;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;

@@ -136,13 +136,13 @@
 
 .auth-toggle button {
   flex: 1;
-  padding: 10px;
+  padding: 9px 4px;
   border: none;
   border-radius: 10px;
   background: transparent;
   color: #9b7373;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 12px;
   cursor: pointer;
   transition: 0.2s ease;
 }

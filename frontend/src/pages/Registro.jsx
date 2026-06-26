@@ -29,7 +29,8 @@ function Registro({ irALogin }) {
       setError("Completa tu nombre, usuario y contraseña");
       return;
     }
-    if (tipo === "empresario" && !empresaNombre) {
+    const creaEmpresa = tipo === "empresario" || tipo === "propietaria";
+    if (creaEmpresa && !empresaNombre) {
       setError("Escribe el nombre de tu empresa");
       return;
     }
@@ -50,7 +51,7 @@ function Registro({ irALogin }) {
         username,
         password,
         email: email || null,
-        empresa_nombre: tipo === "empresario" ? empresaNombre : null,
+        empresa_nombre: creaEmpresa ? empresaNombre : null,
         empresa_codigo: tipo === "usuario" ? empresaCodigo : null,
       });
       iniciarSesion(data.access_token, data.usuario);
@@ -74,25 +75,34 @@ function Registro({ irALogin }) {
             className={tipo === "empresario" ? "active" : ""}
             onClick={() => setTipo("empresario")}
           >
-            Soy empresario
+            Empresario
+          </button>
+          <button
+            type="button"
+            className={tipo === "propietaria" ? "active" : ""}
+            onClick={() => setTipo("propietaria")}
+          >
+            Propietario
           </button>
           <button
             type="button"
             className={tipo === "usuario" ? "active" : ""}
             onClick={() => setTipo("usuario")}
           >
-            Soy empleado
+            Empleado
           </button>
         </div>
 
         <p className="auth-subtitle">
-          {tipo === "empresario"
-            ? "Crea tu empresa y serás su administrador"
-            : "Únete a una empresa con su código"}
+          {tipo === "empresario" &&
+            "Creas tu empresa y solo la administras (no vendes). Puedes contratar empleados."}
+          {tipo === "propietaria" &&
+            "Vendes y administras tu empresa al mismo tiempo. Ideal si manejas el negocio tú mismo; también puedes contratar empleados después."}
+          {tipo === "usuario" && "Únete a una empresa existente con su código."}
         </p>
 
         <form className="form-container" onSubmit={handleSubmit}>
-          {tipo === "empresario" ? (
+          {tipo === "empresario" || tipo === "propietaria" ? (
             <>
               <label>Nombre de la empresa</label>
               <input

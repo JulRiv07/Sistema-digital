@@ -25,22 +25,24 @@ function SummaryCards({ periodo }) {
 
   return (
     <section className="summary">
-      <div className="card">
-        Vendido: {fmtCurrency(resumen.vendido)}
-      </div>
-      {resumen.gastos != null && (
+      <div className="summary-grid">
         <div className="card">
-          Gastos: {fmtCurrency(resumen.gastos)}
+          Vendido: {fmtCurrency(resumen.vendido)}
         </div>
-      )}
-      <div className="card">
-        Pendiente: {fmtCurrency(resumen.pendiente)}
-      </div>
-      {resumen.ganancia != null && (
+        {resumen.gastos != null && (
+          <div className="card">
+            Gastos: {fmtCurrency(resumen.gastos)}
+          </div>
+        )}
         <div className="card">
-          Ganancia: {fmtCurrency(resumen.ganancia)}
+          Pendiente: {fmtCurrency(resumen.pendiente)}
         </div>
-      )}
+        {resumen.ganancia != null && (
+          <div className="card">
+            Ganancia: {fmtCurrency(resumen.ganancia)}
+          </div>
+        )}
+      </div>
     </section>
   );
 }

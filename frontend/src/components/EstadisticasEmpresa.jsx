@@ -27,7 +27,11 @@ function GraficaBarras({ datos, formato }) {
 }
 
 function rolLabel(rol) {
-  return rol === "admin" ? "Empresario" : "Empleado";
+  return rol === "admin"
+    ? "Empresario"
+    : rol === "propietaria"
+    ? "Propietario"
+    : "Empleado";
 }
 
 function EstadisticasEmpresa({ periodo }) {

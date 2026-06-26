@@ -131,7 +131,7 @@ def generar_codigo_empresa(db: Session) -> str:
 def registro(datos: schemas.RegistroRequest, db: Session = Depends(get_db)):
 
     tipo = (datos.tipo or "").strip().lower()
-    if tipo not in ("empresario", "usuario"):
+    if tipo not in ("empresario", "propietaria", "usuario"):
         raise HTTPException(status_code=400, detail="Tipo de registro inválido")
 
     # Reglas de seguridad de la contraseña
@@ -149,8 +149,9 @@ def registro(datos: schemas.RegistroRequest, db: Session = Depends(get_db)):
         if db.query(Usuario).filter(Usuario.email == datos.email).first():
             raise HTTPException(status_code=400, detail="Ese correo ya está registrado")
 
-    if tipo == "empresario":
-        # Crea una empresa nueva y queda como admin
+    if tipo in ("empresario", "propietaria"):
+        # Crea una empresa nueva.
+        # "empresario" = solo administra; "propietaria" = administra y también vende.
         if not datos.empresa_nombre or not datos.empresa_nombre.strip():
             raise HTTPException(status_code=400, detail="Falta el nombre de la empresa")
         empresa = Empresa(
@@ -160,7 +161,7 @@ def registro(datos: schemas.RegistroRequest, db: Session = Depends(get_db)):
         db.add(empresa)
         db.commit()
         db.refresh(empresa)
-        rol = "admin"
+        rol = "admin" if tipo == "empresario" else "propietaria"
     else:
         # Se une a una empresa existente con el código
         if not datos.empresa_codigo or not datos.empresa_codigo.strip():
