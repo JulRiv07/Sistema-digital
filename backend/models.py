@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, DateTime
 from sqlalchemy.sql import func
 from backend.database import Base
 
@@ -72,3 +72,29 @@ class Gasto(Base):
     fecha = Column(DateTime(timezone=True), server_default=func.now())
     descripcion = Column(String, nullable=False)
     monto = Column(Float, nullable=False)
+
+
+class Producto(Base):
+    __tablename__ = "productos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    empresa_id = Column(Integer, ForeignKey("empresas.id"), nullable=False)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    codigo = Column(String, nullable=False)
+    nombre = Column(String, nullable=False)
+    precio = Column(Float, nullable=False)
+    controla_stock = Column(Boolean, nullable=False, default=False)
+    stock = Column(Integer, nullable=True)
+    creado_en = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class VentaItem(Base):
+    __tablename__ = "venta_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    venta_id = Column(Integer, ForeignKey("ventas.id"), nullable=False)
+    producto_id = Column(Integer, ForeignKey("productos.id"), nullable=True)
+    nombre = Column(String, nullable=False)
+    cantidad = Column(Integer, nullable=False)
+    precio_unitario = Column(Float, nullable=False)
+    subtotal = Column(Float, nullable=False)

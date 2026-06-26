@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Modal from "./Modal";
+import { fmtCurrency } from "../services/format";
 import "./VentasList.css";
 
 function VentasList() {
@@ -146,13 +147,24 @@ function VentasList() {
                 
 
                 <span className="venta-total">
-                $ {venta.total}
+                {fmtCurrency(venta.total)}
                 </span>
             </div>
 
-            <div className="venta-descripcion">
+            {venta.items && venta.items.length > 0 ? (
+                <div className="venta-detalle">
+                {venta.items.map((it, i) => (
+                    <div key={i} className="venta-detalle-linea">
+                    <span>{it.cantidad}x {it.nombre}</span>
+                    <span>{fmtCurrency(it.subtotal)}</span>
+                    </div>
+                ))}
+                </div>
+            ) : (
+                <div className="venta-descripcion">
                 {venta.descripcion}
-            </div>
+                </div>
+            )}
 
             <div className="venta-extra">
                 <span>{venta.tipo_pago}</span>

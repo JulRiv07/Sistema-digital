@@ -5,10 +5,10 @@ import secrets
 from fastapi import FastAPI, Depends, Query, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import func, extract
+from sqlalchemy import func, extract, or_
 from datetime import datetime
 
-from backend.models import Base, Empresa, Usuario, Cliente, Venta, Pago, Gasto
+from backend.models import Base, Empresa, Usuario, Cliente, Venta, Pago, Gasto, Producto, VentaItem
 from backend.database import engine, get_db
 import backend.schemas as schemas
 from backend.auth import hash_password, verify_password, crear_token, get_usuario_actual
@@ -522,6 +522,145 @@ def listar_clientes(
     return db.query(Cliente).filter(Cliente.empresa_id == usuario.empresa_id).all()
 
 
+# ===================== PRODUCTOS / INVENTARIO =====================
+
+def producto_dict(p: Producto) -> dict:
+    return {
+        "id": p.id,
+        "codigo": p.codigo,
+        "nombre": p.nombre,
+        "precio": p.precio,
+        "controla_stock": p.controla_stock,
+        "stock": p.stock,
+    }
+
+
+@app.get("/productos")
+def listar_productos(
+    q: str = None,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    query = db.query(Producto).filter(Producto.empresa_id == usuario.empresa_id)
+    if q:
+        patron = f"%{q.strip()}%"
+        query = query.filter(or_(Producto.nombre.ilike(patron), Producto.codigo.ilike(patron)))
+    productos = query.order_by(Producto.nombre).all()
+    return [producto_dict(p) for p in productos]
+
+
+@app.post("/productos")
+def crear_producto(
+    datos: schemas.ProductoCreate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+    codigo = (datos.codigo or "").strip()
+    if not codigo or not datos.nombre.strip():
+        raise HTTPException(status_code=400, detail="El código y el nombre son obligatorios")
+
+    existe = db.query(Producto).filter(
+        Producto.empresa_id == usuario.empresa_id,
+        func.lower(Producto.codigo) == codigo.lower(),
+    ).first()
+    if existe:
+        raise HTTPException(status_code=400, detail="Ya existe un producto con ese código")
+
+    producto = Producto(
+        empresa_id=usuario.empresa_id,
+        usuario_id=usuario.id,
+        codigo=codigo,
+        nombre=datos.nombre.strip(),
+        precio=datos.precio,
+        controla_stock=bool(datos.controla_stock),
+        stock=datos.stock if datos.controla_stock else None,
+    )
+    db.add(producto)
+    db.commit()
+    db.refresh(producto)
+    return producto_dict(producto)
+
+
+@app.put("/productos/{producto_id}")
+def editar_producto(
+    producto_id: int,
+    datos: schemas.ProductoCreate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+    producto = db.query(Producto).filter(
+        Producto.id == producto_id,
+        Producto.empresa_id == usuario.empresa_id,
+    ).first()
+    if not producto:
+        raise HTTPException(status_code=404, detail="Producto no existe")
+
+    codigo = (datos.codigo or "").strip()
+    if not codigo or not datos.nombre.strip():
+        raise HTTPException(status_code=400, detail="El código y el nombre son obligatorios")
+
+    repetido = db.query(Producto).filter(
+        Producto.empresa_id == usuario.empresa_id,
+        func.lower(Producto.codigo) == codigo.lower(),
+        Producto.id != producto_id,
+    ).first()
+    if repetido:
+        raise HTTPException(status_code=400, detail="Ya existe un producto con ese código")
+
+    producto.codigo = codigo
+    producto.nombre = datos.nombre.strip()
+    producto.precio = datos.precio
+    producto.controla_stock = bool(datos.controla_stock)
+    producto.stock = datos.stock if datos.controla_stock else None
+    db.commit()
+    db.refresh(producto)
+    return producto_dict(producto)
+
+
+@app.put("/productos/{producto_id}/stock")
+def actualizar_stock(
+    producto_id: int,
+    datos: schemas.StockUpdate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    producto = db.query(Producto).filter(
+        Producto.id == producto_id,
+        Producto.empresa_id == usuario.empresa_id,
+    ).first()
+    if not producto:
+        raise HTTPException(status_code=404, detail="Producto no existe")
+    if not producto.controla_stock:
+        raise HTTPException(status_code=400, detail="Este producto no maneja stock")
+    if datos.stock < 0:
+        raise HTTPException(status_code=400, detail="El stock no puede ser negativo")
+
+    producto.stock = datos.stock
+    db.commit()
+    db.refresh(producto)
+    return producto_dict(producto)
+
+
+@app.delete("/productos/{producto_id}")
+def eliminar_producto(
+    producto_id: int,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+    producto = db.query(Producto).filter(
+        Producto.id == producto_id,
+        Producto.empresa_id == usuario.empresa_id,
+    ).first()
+    if not producto:
+        raise HTTPException(status_code=404, detail="Producto no existe")
+    db.delete(producto)
+    db.commit()
+    return {"mensaje": "Producto eliminado"}
+
+
 # ===================== VENTAS =====================
 
 @app.post("/ventas")
@@ -539,29 +678,70 @@ def crear_venta(
     if not cliente:
         raise HTTPException(status_code=404, detail="Cliente no existe")
 
+    if not venta.items:
+        raise HTTPException(status_code=400, detail="Agrega al menos un producto a la venta")
+
+    # Validar productos y calcular total
+    total = 0
+    items_calculados = []
+    for it in venta.items:
+        if it.cantidad <= 0:
+            raise HTTPException(status_code=400, detail="La cantidad debe ser mayor a 0")
+        producto = db.query(Producto).filter(
+            Producto.id == it.producto_id,
+            Producto.empresa_id == usuario.empresa_id,
+        ).first()
+        if not producto:
+            raise HTTPException(status_code=404, detail="Uno de los productos no existe")
+        if producto.controla_stock:
+            if producto.stock is None or it.cantidad > producto.stock:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Stock insuficiente de {producto.nombre} (disponible: {producto.stock or 0})",
+                )
+        subtotal = producto.precio * it.cantidad
+        total += subtotal
+        items_calculados.append((producto, it.cantidad, subtotal))
+
+    descripcion = ", ".join(f"{cant}x {prod.nombre}" for prod, cant, _ in items_calculados)
+
     nueva_venta = Venta(
         empresa_id=usuario.empresa_id,
         usuario_id=usuario.id,
         cliente_id=venta.cliente_id,
         tipo_pago=venta.tipo_pago.lower(),
-        descripcion=venta.descripcion,
-        total=venta.total,
+        descripcion=descripcion,
+        total=total,
     )
     db.add(nueva_venta)
     db.commit()
     db.refresh(nueva_venta)
+
+    # Guardar el detalle y descontar stock
+    for producto, cant, subtotal in items_calculados:
+        db.add(VentaItem(
+            venta_id=nueva_venta.id,
+            producto_id=producto.id,
+            nombre=producto.nombre,
+            cantidad=cant,
+            precio_unitario=producto.precio,
+            subtotal=subtotal,
+        ))
+        if producto.controla_stock and producto.stock is not None:
+            producto.stock -= cant
+    db.commit()
 
     if venta.tipo_pago.lower() == "contado":
         nuevo_pago = Pago(
             empresa_id=usuario.empresa_id,
             usuario_id=usuario.id,
             cliente_id=venta.cliente_id,
-            monto=venta.total,
+            monto=total,
         )
         db.add(nuevo_pago)
         db.commit()
 
-    return nueva_venta
+    return {"id": nueva_venta.id, "total": total, "descripcion": descripcion}
 
 
 @app.get("/ventas")
@@ -589,6 +769,18 @@ def listar_ventas(
 
     ventas = query.order_by(Venta.fecha.desc()).all()
 
+    venta_ids = [v.id for v in ventas]
+    items_por_venta = {}
+    if venta_ids:
+        items = db.query(VentaItem).filter(VentaItem.venta_id.in_(venta_ids)).all()
+        for it in items:
+            items_por_venta.setdefault(it.venta_id, []).append({
+                "nombre": it.nombre,
+                "cantidad": it.cantidad,
+                "precio_unitario": it.precio_unitario,
+                "subtotal": it.subtotal,
+            })
+
     return [
         {
             "id": v.id,
@@ -598,6 +790,7 @@ def listar_ventas(
             "fecha": v.fecha,
             "cliente_id": v.cliente_id,
             "cliente_nombre": v.cliente_nombre,
+            "items": items_por_venta.get(v.id, []),
         }
         for v in ventas
     ]
@@ -987,6 +1180,18 @@ def eliminar_venta(
 
     if not venta:
         raise HTTPException(status_code=404, detail="Venta no existe")
+
+    # Devolver el stock de los productos y borrar el detalle
+    items = db.query(VentaItem).filter(VentaItem.venta_id == venta.id).all()
+    for it in items:
+        if it.producto_id:
+            producto = db.query(Producto).filter(
+                Producto.id == it.producto_id,
+                Producto.empresa_id == usuario.empresa_id,
+            ).first()
+            if producto and producto.controla_stock and producto.stock is not None:
+                producto.stock += it.cantidad
+        db.delete(it)
 
     db.delete(venta)
     db.commit()

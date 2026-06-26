@@ -10,6 +10,8 @@ import GastosList from "./GastosList";
 import AdminPanel from "./AdminPanel";
 import PerfilPanel from "./PerfilPanel";
 import EstadisticasEmpresa from "./EstadisticasEmpresa";
+import Inventario from "./Inventario";
+import ProductosView from "./ProductosView";
 
 function ContentPanel({
   activeSection,
@@ -62,6 +64,12 @@ function ContentPanel({
 
       case "estadisticas":
         return <EstadisticasEmpresa periodo={periodo} />;
+
+      case "inventario":
+        return <Inventario />;
+
+      case "productos":
+        return <ProductosView />;
 
     default:
       return <h4>Selecciona una opción</h4>;

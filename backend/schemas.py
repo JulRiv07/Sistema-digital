@@ -6,11 +6,27 @@ class ClienteCreate(BaseModel):
     telefono: str | None = None
 
 
+class VentaItemIn(BaseModel):
+    producto_id: int
+    cantidad: int
+
+
 class VentaCreate(BaseModel):
     cliente_id: int
     tipo_pago: str
-    descripcion: str
-    total: float
+    items: list[VentaItemIn]
+
+
+class ProductoCreate(BaseModel):
+    codigo: str
+    nombre: str
+    precio: float
+    controla_stock: bool = False
+    stock: int | None = None
+
+
+class StockUpdate(BaseModel):
+    stock: int
 
 
 class PagoCreate(BaseModel):

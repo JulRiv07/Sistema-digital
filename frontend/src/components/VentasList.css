@@ -49,6 +49,20 @@
     color: var(--c-title);
 }
 
+.venta-detalle {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.venta-detalle-linea {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--c-text);
+}
+
 .venta-extra {
     margin-top: 8px;
     display: flex;

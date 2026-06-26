@@ -50,17 +50,21 @@ function Sidebar({ activeSection, setActiveSection }) {
         </Boton>
       )}
 
+      {/* Productos: empleado (la propietaria lo ve dentro de Inventario) */}
+      {esOperador && !esAdmin && (
+        <Boton seccion="productos" icono={saving}>Productos</Boton>
+      )}
+
       {/* Comunes a los dos roles */}
       <Boton seccion="clientes" icono={cliente}>Clientes</Boton>
       <Boton seccion="verVentas" icono={memo}>Ver ventas</Boton>
       <Boton seccion="verPagos" icono={money}>Ver pagos</Boton>
 
-      {/* Ver gastos: solo empresario / propietaria */}
-      {esAdmin && <Boton seccion="verGastos" icono={saving}>Ver gastos</Boton>}
-
       {/* Solo empresario / propietaria */}
       {esAdmin && (
         <>
+          <Boton seccion="verGastos" icono={saving}>Ver gastos</Boton>
+          <Boton seccion="inventario" icono={money}>Inventario</Boton>
           <Boton seccion="estadisticas" icono={memo}>Estadísticas</Boton>
           <Boton seccion="admin" icono={cliente}>Administración</Boton>
         </>
