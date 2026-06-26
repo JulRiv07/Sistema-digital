@@ -11,8 +11,8 @@ export default defineConfig({
         name: "Controla",
         short_name: "Controla",
         description: "Controla — gestión de ventas, pagos, gastos e inventario",
-        theme_color: "#4f46e5",
-        background_color: "#4f46e5",
+        theme_color: "#2563eb",
+        background_color: "#1e3a8a",
         icons: [
           {
             src: "/icon-192.png",
