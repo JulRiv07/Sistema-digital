@@ -95,12 +95,17 @@ function VentasList() {
     };
 
     const eliminarVenta = async () => {
-        await axios.delete(
-        `/ventas/${selectedVenta.id}`
-        );
-
-        cerrarModal();
-        cargarVentas();
+        try {
+            await axios.delete(`/ventas/${selectedVenta.id}`);
+            cerrarModal();
+            cargarVentas();
+        } catch (error) {
+            console.error("Error al eliminar venta:", error);
+            alert(
+                error.response?.data?.detail ||
+                "No se pudo eliminar la venta. Revisa tu conexión o vuelve a iniciar sesión."
+            );
+        }
     };
 
     const cerrarModal = () => {
