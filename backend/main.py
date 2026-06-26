@@ -1181,7 +1181,7 @@ def eliminar_venta(
     if not venta:
         raise HTTPException(status_code=404, detail="Venta no existe")
 
-    # Devolver el stock de los productos y borrar el detalle
+    # 1) Devolver el stock de los productos vendidos
     items = db.query(VentaItem).filter(VentaItem.venta_id == venta.id).all()
     for it in items:
         if it.producto_id:
@@ -1191,8 +1191,12 @@ def eliminar_venta(
             ).first()
             if producto and producto.controla_stock and producto.stock is not None:
                 producto.stock += it.cantidad
-        db.delete(it)
 
+    # 2) Borrar el detalle PRIMERO (SQL directo) y asegurarlo antes de la venta
+    db.query(VentaItem).filter(VentaItem.venta_id == venta.id).delete(synchronize_session=False)
+    db.flush()
+
+    # 3) Ahora sí, borrar la venta
     db.delete(venta)
     db.commit()
     return {"mensaje": "Venta eliminada"}
