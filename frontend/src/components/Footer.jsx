@@ -18,7 +18,7 @@ function fraseAleatoria(excluir) {
 function Footer() {
   const { usuario } = useAuth();
 
-  const empresaNombre = usuario?.empresa_nombre || "Sistema Digital";
+  const empresaNombre = usuario?.empresa_nombre || "Controla";
   const esPrincipal = empresaNombre === EMPRESA_PRINCIPAL;
   const anio = new Date().getFullYear();
 
@@ -45,7 +45,7 @@ function Footer() {
       ) : (
         <p className="footer-info">
           {empresaNombre} <br />
-          {anio} · Powered by Sistema Digital
+          {anio} · Powered by Controla
         </p>
       )}
     </footer>

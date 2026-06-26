@@ -7,21 +7,21 @@
   padding: 24px;
   box-sizing: border-box;
   background:
-    radial-gradient(1100px 600px at 8% 8%, #f9e8e8 0%, transparent 60%),
-    radial-gradient(1000px 600px at 92% 92%, #ecccd4 0%, transparent 55%),
-    linear-gradient(135deg, #f3dede 0%, #e6c7cd 100%);
+    radial-gradient(1100px 600px at 8% 8%, rgba(124, 58, 237, 0.55) 0%, transparent 60%),
+    radial-gradient(1000px 600px at 92% 92%, rgba(34, 211, 238, 0.5) 0%, transparent 55%),
+    linear-gradient(135deg, #4f46e5 0%, #6d28d9 50%, #0891b2 100%);
 }
 
 .auth-card {
   width: 100%;
   max-width: 400px;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 24px;
-  padding: 38px 32px;
-  box-shadow: 0 20px 50px rgba(150, 90, 95, 0.25);
+  padding: 36px 32px;
+  box-shadow: 0 24px 60px rgba(30, 20, 80, 0.35);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -34,28 +34,36 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+.auth-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
+  margin-bottom: 8px;
+}
+
 .auth-brand {
   margin: 0 0 2px;
   font-size: 30px;
   font-weight: 800;
   letter-spacing: 0.5px;
   text-align: center;
-  background: linear-gradient(90deg, #c98b8b, #a86a72);
+  background: linear-gradient(90deg, #6d5efc, #22d3ee);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .auth-title {
-  margin: 10px 0 4px;
-  color: #5a3a3a;
+  margin: 8px 0 4px;
+  color: #2e3350;
   font-size: 20px;
   font-weight: 700;
 }
 
 .auth-subtitle {
   margin: 0 0 22px;
-  color: #a87d7d;
+  color: #7b80a0;
   font-size: 14px;
   text-align: center;
 }
@@ -65,7 +73,6 @@
   gap: 4px;
 }
 
-/* Etiquetas modernas: texto pequeño en mayúsculas, sin "chip" */
 .auth-card .form-container label {
   background: none;
   border-radius: 0;
@@ -74,45 +81,43 @@
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  color: #b08a8a;
+  color: #8a8fb0;
 }
 
-/* Inputs modernos */
 .auth-card .form-container input {
-  background: #fbf5f5;
-  border: 1.5px solid #ecd8d8;
+  background: #f4f5fb;
+  border: 1.5px solid #e2e4f0;
   border-radius: 14px;
   padding: 14px 16px;
   font-size: 15px;
+  color: #20243d;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .auth-card .form-container input:focus {
-  border-color: #c98b8b;
-  box-shadow: 0 0 0 4px rgba(201, 139, 139, 0.18);
+  border-color: #6d5efc;
+  box-shadow: 0 0 0 4px rgba(109, 94, 252, 0.18);
 }
 
-/* Espacio para el ojito en los campos de contraseña */
 .auth-card .password-field input {
   padding-right: 48px;
 }
 
-/* Botón principal moderno */
 .auth-card .form-container button {
   margin-top: 18px;
   padding: 14px;
   border-radius: 14px;
   font-size: 15px;
   color: white;
-  background: linear-gradient(90deg, #c98b8b, #b67979);
-  box-shadow: 0 8px 20px rgba(182, 121, 121, 0.35);
+  background: linear-gradient(90deg, #6d5efc, #22d3ee);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
   transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s;
 }
 
 .auth-card .form-container button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 26px rgba(182, 121, 121, 0.45);
-  background: linear-gradient(90deg, #c98b8b, #b67979);
+  box-shadow: 0 12px 26px rgba(79, 70, 229, 0.45);
+  background: linear-gradient(90deg, #6d5efc, #22d3ee);
 }
 
 .auth-card .form-container button:disabled {
@@ -122,13 +127,12 @@
   cursor: not-allowed;
 }
 
-/* Selector empresario / empleado: control segmentado */
 .auth-toggle {
   display: flex;
   width: 100%;
   gap: 6px;
   margin-bottom: 18px;
-  background: #f3e6e6;
+  background: #eef0f8;
   padding: 5px;
   border-radius: 14px;
   box-sizing: border-box;
@@ -140,7 +144,7 @@
   border: none;
   border-radius: 10px;
   background: transparent;
-  color: #9b7373;
+  color: #7b80a0;
   font-weight: 700;
   font-size: 12px;
   cursor: pointer;
@@ -149,8 +153,8 @@
 
 .auth-toggle button.active {
   background: #ffffff;
-  color: #b06a6a;
-  box-shadow: 0 2px 8px rgba(150, 90, 95, 0.18);
+  color: #4f46e5;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
 }
 
 .auth-error {
@@ -169,20 +173,20 @@
 .auth-hint {
   margin: 2px 0 0;
   font-size: 12px;
-  color: #a87d7d;
+  color: #8a8fb0;
 }
 
 .auth-switch {
   margin-top: 22px;
   font-size: 14px;
-  color: #6b5555;
+  color: #5a5f7d;
   text-align: center;
 }
 
 .auth-link {
   background: none;
   border: none;
-  color: #c98b8b;
+  color: #6d5efc;
   font-weight: 700;
   cursor: pointer;
   padding: 0;
@@ -190,11 +194,10 @@
   font-family: inherit;
 }
 .auth-link:hover {
-  color: #b67979;
+  color: #4f46e5;
   text-decoration: underline;
 }
 
-/* Campo de contraseña con ojito */
 .password-field {
   position: relative;
   display: flex;
@@ -215,7 +218,7 @@
   padding: 4px;
   background: none;
   border: none;
-  color: #9a7a7a;
+  color: #8a8fb0;
   line-height: 0;
   display: flex;
   align-items: center;
@@ -226,7 +229,7 @@
 
 .form-container .password-field .password-toggle:hover {
   background: none;
-  color: #6a4a4a;
+  color: #4f46e5;
   transform: none;
 }
 
@@ -236,7 +239,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f3dede 0%, #e6c7cd 100%);
-  color: #8a5a5a;
+  background: linear-gradient(135deg, #4f46e5 0%, #6d28d9 50%, #0891b2 100%);
+  color: #ffffff;
   font-size: 18px;
 }

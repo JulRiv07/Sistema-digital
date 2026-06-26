@@ -7,6 +7,28 @@
   padding: 14px 40px;
 }
 
+.header-app {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-app-logo {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+}
+
+.header-app-name {
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+  background: linear-gradient(90deg, #6d5efc, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .header-brand {
   display: flex;
   align-items: center;

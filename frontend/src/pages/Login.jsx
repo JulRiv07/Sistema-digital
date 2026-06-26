@@ -36,7 +36,8 @@ function Login({ irARegistro }) {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h1 className="auth-brand">Sistema Digital</h1>
+        <img src="/controla.svg" alt="Controla" className="auth-logo" />
+        <h1 className="auth-brand">Controla</h1>
         <h2 className="auth-title">Iniciar sesión</h2>
         <p className="auth-subtitle">Bienvenid@ de nuevo</p>
 

@@ -8,12 +8,17 @@ const EMPRESA_PRINCIPAL = "Postres Juli";
 function Header() {
   const { usuario, cerrarSesion } = useAuth();
 
-  const empresaNombre = usuario?.empresa_nombre || "Sistema Digital";
+  const empresaNombre = usuario?.empresa_nombre || "Controla";
   const esPrincipal = empresaNombre === EMPRESA_PRINCIPAL;
   const logoEmpresa = usuario?.empresa_logo;
 
   return (
     <header className="header">
+      <div className="header-app">
+        <img src="/controla.svg" alt="Controla" className="header-app-logo" />
+        <span className="header-app-name">Controla</span>
+      </div>
+
       <div className="header-brand">
         {logoEmpresa ? (
           <img src={logoEmpresa} alt="Logo" className="header-logo" />
