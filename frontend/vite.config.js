@@ -8,20 +8,29 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: "Postres Juli",
-        short_name: "Postres",
-        description: "Sistema de control de ventas y gastos",
-        theme_color: "#ffffff",
+        name: "Controla",
+        short_name: "Controla",
+        description: "Controla — gestión de ventas, pagos, gastos e inventario",
+        theme_color: "#4f46e5",
+        background_color: "#4f46e5",
         icons: [
           {
             src: "/icon-192.png",
             sizes: "192x192",
-            type: "image/png"
+            type: "image/png",
+            purpose: "any"
           },
           {
-            src: "/icon-192.png",
+            src: "/icon-512.png",
             sizes: "512x512",
-            type: "image/png"
+            type: "image/png",
+            purpose: "any"
+          },
+          {
+            src: "/icon-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable"
           }
         ]
       }

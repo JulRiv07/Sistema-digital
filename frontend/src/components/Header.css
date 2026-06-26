@@ -8,21 +8,25 @@
 }
 
 .header-app {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 5px 14px 5px 7px;
+  border-radius: 999px;
+  box-shadow: 0 3px 10px rgba(40, 30, 80, 0.18);
 }
 
 .header-app-logo {
   width: 26px;
   height: 26px;
-  border-radius: 7px;
+  border-radius: 8px;
 }
 
 .header-app-name {
   font-weight: 800;
-  font-size: 18px;
-  letter-spacing: 0.5px;
+  font-size: 17px;
+  letter-spacing: 0.3px;
   background: linear-gradient(90deg, #6d5efc, #22d3ee);
   -webkit-background-clip: text;
   background-clip: text;
