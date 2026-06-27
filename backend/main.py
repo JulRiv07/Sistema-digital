@@ -205,7 +205,7 @@ def _set_auth_cookies(response: Response, access_token: str, refresh_token: str)
         secure=COOKIE_SECURE,
         samesite=COOKIE_SAMESITE,
         max_age=60 * 60 * 24 * REFRESH_TOKEN_DIAS,
-        path="/auth/refresh",
+        path="/",
     )
 
 
@@ -309,7 +309,7 @@ def logout(
     response.set_cookie(
         key="refresh_token", value="",
         httponly=True, secure=COOKIE_SECURE, samesite=COOKIE_SAMESITE,
-        max_age=0, expires=0, path="/auth/refresh",
+        max_age=0, expires=0, path="/",
     )
     return {"mensaje": "Sesión cerrada"}
 
