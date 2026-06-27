@@ -299,8 +299,18 @@ def logout(
     db: Session = Depends(get_db),
 ):
     revocar_refresh_token(refresh_token, db)
-    response.delete_cookie("access_token", path="/")
-    response.delete_cookie("refresh_token", path="/auth/refresh")
+    # Los atributos deben coincidir exactamente con los del set_cookie original
+    # para que el browser acepte el borrado
+    response.set_cookie(
+        key="access_token", value="",
+        httponly=True, secure=COOKIE_SECURE, samesite=COOKIE_SAMESITE,
+        max_age=0, expires=0, path="/",
+    )
+    response.set_cookie(
+        key="refresh_token", value="",
+        httponly=True, secure=COOKIE_SECURE, samesite=COOKIE_SAMESITE,
+        max_age=0, expires=0, path="/auth/refresh",
+    )
     return {"mensaje": "Sesión cerrada"}
 
 
