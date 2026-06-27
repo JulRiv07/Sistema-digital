@@ -8,8 +8,9 @@ export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
   const [cargando, setCargando] = useState(true);
 
-  // Al cargar la app: el cookie de acceso se envía automáticamente si existe
+  // Al cargar la app: limpiar token legacy de localStorage y validar sesión via cookie
   useEffect(() => {
+    localStorage.removeItem("token");
     axios
       .get("/me")
       .then((res) => setUsuario(res.data))
