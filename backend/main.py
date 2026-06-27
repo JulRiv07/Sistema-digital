@@ -1,23 +1,83 @@
 import re
 import string
 import secrets
+import time
+from collections import defaultdict
 
-from fastapi import FastAPI, Depends, Query, HTTPException, Request
+from fastapi import Cookie, FastAPI, Depends, Query, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import func, extract, or_
+from sqlalchemy import func, extract
 from datetime import datetime
 
-from backend.models import Base, Empresa, Usuario, Cliente, Venta, Pago, Gasto, Producto, VentaItem
+from backend.models import Base, Empresa, Usuario, Cliente, Venta, Pago, Gasto, Producto, VentaItem, RefreshToken
 from backend.database import engine, get_db
 import backend.schemas as schemas
-from backend.auth import hash_password, verify_password, crear_token, get_usuario_actual
+from backend.auth import (
+    hash_password, verify_password,
+    crear_access_token, crear_refresh_token,
+    revocar_refresh_token, verificar_refresh_token,
+    get_usuario_actual,
+    ACCESS_TOKEN_MINUTOS, REFRESH_TOKEN_DIAS,
+    COOKIE_SECURE, COOKIE_SAMESITE,
+)
+
+
+# ---- Rate limiting para /login ----
+_login_intentos: dict[str, list[float]] = defaultdict(list)
+_LIMITE_INTENTOS = 5
+_VENTANA_RATE = 300  # 5 minutos
+
+
+def _verificar_rate_limit(ip: str):
+    ahora = time.time()
+    _login_intentos[ip] = [t for t in _login_intentos[ip] if ahora - t < _VENTANA_RATE]
+    if len(_login_intentos[ip]) >= _LIMITE_INTENTOS:
+        raise HTTPException(status_code=429, detail="Demasiados intentos. Espera 5 minutos.")
+    _login_intentos[ip].append(ahora)
+
+
+# ---- Constantes de validación ----
+_USERNAME_RE = re.compile(r"^[a-z0-9_.]{3,30}$")
+_LOGO_MAX_LEN = 200_000
+_LOGO_PREFIJOS = (
+    "data:image/jpeg;base64,",
+    "data:image/png;base64,",
+    "data:image/webp;base64,",
+)
+
+
+def _validar_logo(logo: str | None) -> None:
+    if logo is None:
+        return
+    if not any(logo.startswith(p) for p in _LOGO_PREFIJOS):
+        raise HTTPException(
+            status_code=400,
+            detail="El logo debe ser una imagen JPEG, PNG o WebP en formato base64",
+        )
+    if len(logo) > _LOGO_MAX_LEN:
+        raise HTTPException(
+            status_code=400,
+            detail="El logo supera el tamaño máximo permitido (150 KB)",
+        )
 
 
 app = FastAPI(
     docs_url=None,
     redoc_url=None
 )
+
+
+class _SecurityHeaders(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        return response
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,6 +90,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(_SecurityHeaders)
 
 
 Base.metadata.create_all(bind=engine)
@@ -59,7 +120,7 @@ def usuario_payload(usuario: Usuario, db: Session) -> dict:
 
 
 def estadisticas_usuario(db: Session, empresa_id: int, usuario_id: int,
-                         mes: int = None, anio: int = None) -> dict:
+                        mes: int = None, anio: int = None) -> dict:
     """Calcula las estadísticas de lo que ha registrado un usuario.
     Si se pasa mes y anio, filtra solo ese período."""
     filtrar = mes is not None and anio is not None
@@ -127,8 +188,29 @@ def generar_codigo_empresa(db: Session) -> str:
 
 # ===================== AUTENTICACIÓN =====================
 
-@app.post("/registro", response_model=schemas.TokenResponse)
-def registro(datos: schemas.RegistroRequest, db: Session = Depends(get_db)):
+def _set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        max_age=60 * ACCESS_TOKEN_MINUTOS,
+        path="/",
+    )
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        max_age=60 * 60 * 24 * REFRESH_TOKEN_DIAS,
+        path="/auth/refresh",
+    )
+
+
+@app.post("/registro", response_model=schemas.LoginResponse)
+def registro(datos: schemas.RegistroRequest, response: Response, db: Session = Depends(get_db)):
 
     tipo = (datos.tipo or "").strip().lower()
     if tipo not in ("empresario", "propietaria", "usuario"):
@@ -141,6 +223,8 @@ def registro(datos: schemas.RegistroRequest, db: Session = Depends(get_db)):
     username = (datos.username or "").strip().lower()
     if len(username) < 3:
         raise HTTPException(status_code=400, detail="El nombre de usuario debe tener al menos 3 caracteres")
+    if not _USERNAME_RE.match(username):
+        raise HTTPException(status_code=400, detail="El nombre de usuario solo puede contener letras minúsculas, números, puntos y guiones bajos (máx. 30 caracteres)")
     if db.query(Usuario).filter(Usuario.username == username).first():
         raise HTTPException(status_code=400, detail="Ese nombre de usuario ya está en uso")
 
@@ -185,12 +269,16 @@ def registro(datos: schemas.RegistroRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(usuario)
 
-    token = crear_token(usuario)
-    return {"access_token": token, "token_type": "bearer", "usuario": usuario_payload(usuario, db)}
+    access_token = crear_access_token(usuario)
+    refresh_token = crear_refresh_token(usuario, db)
+    _set_auth_cookies(response, access_token, refresh_token)
+    return {"usuario": usuario_payload(usuario, db)}
 
 
-@app.post("/login", response_model=schemas.TokenResponse)
-def login(datos: schemas.LoginRequest, db: Session = Depends(get_db)):
+@app.post("/login", response_model=schemas.LoginResponse)
+def login(datos: schemas.LoginRequest, request: Request, response: Response, db: Session = Depends(get_db)):
+    ip = request.client.host if request.client else "unknown"
+    _verificar_rate_limit(ip)
 
     username = (datos.username or "").strip().lower()
     usuario = db.query(Usuario).filter(Usuario.username == username).first()
@@ -198,8 +286,37 @@ def login(datos: schemas.LoginRequest, db: Session = Depends(get_db)):
     if not usuario or not verify_password(datos.password, usuario.password_hash):
         raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos")
 
-    token = crear_token(usuario)
-    return {"access_token": token, "token_type": "bearer", "usuario": usuario_payload(usuario, db)}
+    access_token = crear_access_token(usuario)
+    refresh_token = crear_refresh_token(usuario, db)
+    _set_auth_cookies(response, access_token, refresh_token)
+    return {"usuario": usuario_payload(usuario, db)}
+
+
+@app.post("/logout")
+def logout(
+    response: Response,
+    refresh_token: str | None = Cookie(default=None),
+    db: Session = Depends(get_db),
+):
+    revocar_refresh_token(refresh_token, db)
+    response.delete_cookie("access_token", path="/")
+    response.delete_cookie("refresh_token", path="/auth/refresh")
+    return {"mensaje": "Sesión cerrada"}
+
+
+@app.post("/auth/refresh", response_model=schemas.LoginResponse)
+def refresh_access_token(
+    response: Response,
+    refresh_token: str | None = Cookie(default=None),
+    db: Session = Depends(get_db),
+):
+    usuario = verificar_refresh_token(refresh_token, db)
+    # Rotar el refresh token (revocar el viejo, crear uno nuevo)
+    revocar_refresh_token(refresh_token, db)
+    new_access = crear_access_token(usuario)
+    new_refresh = crear_refresh_token(usuario, db)
+    _set_auth_cookies(response, new_access, new_refresh)
+    return {"usuario": usuario_payload(usuario, db)}
 
 
 @app.get("/me", response_model=schemas.UsuarioOut)
@@ -222,6 +339,8 @@ def actualizar_perfil(
     username = (datos.username or "").strip().lower()
     if len(username) < 3:
         raise HTTPException(status_code=400, detail="El nombre de usuario debe tener al menos 3 caracteres")
+    if not _USERNAME_RE.match(username):
+        raise HTTPException(status_code=400, detail="El nombre de usuario solo puede contener letras minúsculas, números, puntos y guiones bajos (máx. 30 caracteres)")
 
     # username único entre OTROS usuarios
     if db.query(Usuario).filter(Usuario.username == username, Usuario.id != usuario.id).first():
@@ -328,6 +447,7 @@ def cambiar_logo_empresa(
     usuario: Usuario = Depends(get_usuario_actual),
 ):
     requiere_admin(usuario)
+    _validar_logo(datos.logo)
     empresa = db.query(Empresa).filter(Empresa.id == usuario.empresa_id).first()
     empresa.logo = datos.logo or None
     db.commit()
@@ -522,145 +642,6 @@ def listar_clientes(
     return db.query(Cliente).filter(Cliente.empresa_id == usuario.empresa_id).all()
 
 
-# ===================== PRODUCTOS / INVENTARIO =====================
-
-def producto_dict(p: Producto) -> dict:
-    return {
-        "id": p.id,
-        "codigo": p.codigo,
-        "nombre": p.nombre,
-        "precio": p.precio,
-        "controla_stock": p.controla_stock,
-        "stock": p.stock,
-    }
-
-
-@app.get("/productos")
-def listar_productos(
-    q: str = None,
-    db: Session = Depends(get_db),
-    usuario: Usuario = Depends(get_usuario_actual),
-):
-    query = db.query(Producto).filter(Producto.empresa_id == usuario.empresa_id)
-    if q:
-        patron = f"%{q.strip()}%"
-        query = query.filter(or_(Producto.nombre.ilike(patron), Producto.codigo.ilike(patron)))
-    productos = query.order_by(Producto.nombre).all()
-    return [producto_dict(p) for p in productos]
-
-
-@app.post("/productos")
-def crear_producto(
-    datos: schemas.ProductoCreate,
-    db: Session = Depends(get_db),
-    usuario: Usuario = Depends(get_usuario_actual),
-):
-    requiere_admin(usuario)
-    codigo = (datos.codigo or "").strip()
-    if not codigo or not datos.nombre.strip():
-        raise HTTPException(status_code=400, detail="El código y el nombre son obligatorios")
-
-    existe = db.query(Producto).filter(
-        Producto.empresa_id == usuario.empresa_id,
-        func.lower(Producto.codigo) == codigo.lower(),
-    ).first()
-    if existe:
-        raise HTTPException(status_code=400, detail="Ya existe un producto con ese código")
-
-    producto = Producto(
-        empresa_id=usuario.empresa_id,
-        usuario_id=usuario.id,
-        codigo=codigo,
-        nombre=datos.nombre.strip(),
-        precio=datos.precio,
-        controla_stock=bool(datos.controla_stock),
-        stock=datos.stock if datos.controla_stock else None,
-    )
-    db.add(producto)
-    db.commit()
-    db.refresh(producto)
-    return producto_dict(producto)
-
-
-@app.put("/productos/{producto_id}")
-def editar_producto(
-    producto_id: int,
-    datos: schemas.ProductoCreate,
-    db: Session = Depends(get_db),
-    usuario: Usuario = Depends(get_usuario_actual),
-):
-    requiere_admin(usuario)
-    producto = db.query(Producto).filter(
-        Producto.id == producto_id,
-        Producto.empresa_id == usuario.empresa_id,
-    ).first()
-    if not producto:
-        raise HTTPException(status_code=404, detail="Producto no existe")
-
-    codigo = (datos.codigo or "").strip()
-    if not codigo or not datos.nombre.strip():
-        raise HTTPException(status_code=400, detail="El código y el nombre son obligatorios")
-
-    repetido = db.query(Producto).filter(
-        Producto.empresa_id == usuario.empresa_id,
-        func.lower(Producto.codigo) == codigo.lower(),
-        Producto.id != producto_id,
-    ).first()
-    if repetido:
-        raise HTTPException(status_code=400, detail="Ya existe un producto con ese código")
-
-    producto.codigo = codigo
-    producto.nombre = datos.nombre.strip()
-    producto.precio = datos.precio
-    producto.controla_stock = bool(datos.controla_stock)
-    producto.stock = datos.stock if datos.controla_stock else None
-    db.commit()
-    db.refresh(producto)
-    return producto_dict(producto)
-
-
-@app.put("/productos/{producto_id}/stock")
-def actualizar_stock(
-    producto_id: int,
-    datos: schemas.StockUpdate,
-    db: Session = Depends(get_db),
-    usuario: Usuario = Depends(get_usuario_actual),
-):
-    producto = db.query(Producto).filter(
-        Producto.id == producto_id,
-        Producto.empresa_id == usuario.empresa_id,
-    ).first()
-    if not producto:
-        raise HTTPException(status_code=404, detail="Producto no existe")
-    if not producto.controla_stock:
-        raise HTTPException(status_code=400, detail="Este producto no maneja stock")
-    if datos.stock < 0:
-        raise HTTPException(status_code=400, detail="El stock no puede ser negativo")
-
-    producto.stock = datos.stock
-    db.commit()
-    db.refresh(producto)
-    return producto_dict(producto)
-
-
-@app.delete("/productos/{producto_id}")
-def eliminar_producto(
-    producto_id: int,
-    db: Session = Depends(get_db),
-    usuario: Usuario = Depends(get_usuario_actual),
-):
-    requiere_admin(usuario)
-    producto = db.query(Producto).filter(
-        Producto.id == producto_id,
-        Producto.empresa_id == usuario.empresa_id,
-    ).first()
-    if not producto:
-        raise HTTPException(status_code=404, detail="Producto no existe")
-    db.delete(producto)
-    db.commit()
-    return {"mensaje": "Producto eliminado"}
-
-
 # ===================== VENTAS =====================
 
 @app.post("/ventas")
@@ -670,78 +651,80 @@ def crear_venta(
     usuario: Usuario = Depends(get_usuario_actual),
 ):
     requiere_empleado(usuario)
+
     cliente = db.query(Cliente).filter(
         Cliente.id == venta.cliente_id,
         Cliente.empresa_id == usuario.empresa_id,
     ).first()
-
     if not cliente:
         raise HTTPException(status_code=404, detail="Cliente no existe")
 
     if not venta.items:
-        raise HTTPException(status_code=400, detail="Agrega al menos un producto a la venta")
+        raise HTTPException(status_code=400, detail="La venta debe tener al menos un producto")
 
-    # Validar productos y calcular total
-    total = 0
-    items_calculados = []
-    for it in venta.items:
-        if it.cantidad <= 0:
-            raise HTTPException(status_code=400, detail="La cantidad debe ser mayor a 0")
-        producto = db.query(Producto).filter(
-            Producto.id == it.producto_id,
+    tipo_pago = venta.tipo_pago.strip().lower()
+    if tipo_pago not in ("contado", "credito"):
+        raise HTTPException(status_code=400, detail="tipo_pago debe ser 'contado' o 'credito'")
+
+    # Cargar todos los productos de una vez (evita N+1)
+    ids = [item.producto_id for item in venta.items]
+    prods = {
+        p.id: p
+        for p in db.query(Producto).filter(
+            Producto.id.in_(ids),
             Producto.empresa_id == usuario.empresa_id,
-        ).first()
-        if not producto:
-            raise HTTPException(status_code=404, detail="Uno de los productos no existe")
-        if producto.controla_stock:
-            if producto.stock is None or it.cantidad > producto.stock:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Stock insuficiente de {producto.nombre} (disponible: {producto.stock or 0})",
-                )
-        subtotal = producto.precio * it.cantidad
-        total += subtotal
-        items_calculados.append((producto, it.cantidad, subtotal))
+        ).all()
+    }
 
-    descripcion = ", ".join(f"{cant}x {prod.nombre}" for prod, cant, _ in items_calculados)
+    # Validar existencia y stock
+    for item in venta.items:
+        prod = prods.get(item.producto_id)
+        if not prod:
+            raise HTTPException(status_code=404, detail=f"Producto {item.producto_id} no existe")
+        if prod.controla_stock and (prod.stock is None or prod.stock < item.cantidad):
+            raise HTTPException(status_code=400, detail=f"Stock insuficiente para '{prod.nombre}'")
+
+    # Calcular total y descripción
+    total = round(sum(prods[i.producto_id].precio * i.cantidad for i in venta.items), 2)
+    descripcion = ", ".join(
+        f"{prods[i.producto_id].nombre} x{i.cantidad}" for i in venta.items
+    )
 
     nueva_venta = Venta(
         empresa_id=usuario.empresa_id,
         usuario_id=usuario.id,
         cliente_id=venta.cliente_id,
-        tipo_pago=venta.tipo_pago.lower(),
+        tipo_pago=tipo_pago,
         descripcion=descripcion,
         total=total,
     )
     db.add(nueva_venta)
-    db.commit()
-    db.refresh(nueva_venta)
+    db.flush()  # obtener nueva_venta.id antes del commit
 
-    # Guardar el detalle y descontar stock
-    for producto, cant, subtotal in items_calculados:
+    for item in venta.items:
+        prod = prods[item.producto_id]
         db.add(VentaItem(
             venta_id=nueva_venta.id,
-            producto_id=producto.id,
-            nombre=producto.nombre,
-            cantidad=cant,
-            precio_unitario=producto.precio,
-            subtotal=subtotal,
+            producto_id=prod.id,
+            nombre=prod.nombre,
+            cantidad=item.cantidad,
+            precio_unitario=prod.precio,
+            subtotal=round(prod.precio * item.cantidad, 2),
         ))
-        if producto.controla_stock and producto.stock is not None:
-            producto.stock -= cant
-    db.commit()
+        if prod.controla_stock:
+            prod.stock -= item.cantidad
 
-    if venta.tipo_pago.lower() == "contado":
-        nuevo_pago = Pago(
+    if tipo_pago == "contado":
+        db.add(Pago(
             empresa_id=usuario.empresa_id,
             usuario_id=usuario.id,
             cliente_id=venta.cliente_id,
             monto=total,
-        )
-        db.add(nuevo_pago)
-        db.commit()
+        ))
 
-    return {"id": nueva_venta.id, "total": total, "descripcion": descripcion}
+    db.commit()
+    db.refresh(nueva_venta)
+    return nueva_venta
 
 
 @app.get("/ventas")
@@ -769,18 +752,6 @@ def listar_ventas(
 
     ventas = query.order_by(Venta.fecha.desc()).all()
 
-    venta_ids = [v.id for v in ventas]
-    items_por_venta = {}
-    if venta_ids:
-        items = db.query(VentaItem).filter(VentaItem.venta_id.in_(venta_ids)).all()
-        for it in items:
-            items_por_venta.setdefault(it.venta_id, []).append({
-                "nombre": it.nombre,
-                "cantidad": it.cantidad,
-                "precio_unitario": it.precio_unitario,
-                "subtotal": it.subtotal,
-            })
-
     return [
         {
             "id": v.id,
@@ -790,7 +761,6 @@ def listar_ventas(
             "fecha": v.fecha,
             "cliente_id": v.cliente_id,
             "cliente_nombre": v.cliente_nombre,
-            "items": items_por_venta.get(v.id, []),
         }
         for v in ventas
     ]
@@ -1181,22 +1151,6 @@ def eliminar_venta(
     if not venta:
         raise HTTPException(status_code=404, detail="Venta no existe")
 
-    # 1) Devolver el stock de los productos vendidos
-    items = db.query(VentaItem).filter(VentaItem.venta_id == venta.id).all()
-    for it in items:
-        if it.producto_id:
-            producto = db.query(Producto).filter(
-                Producto.id == it.producto_id,
-                Producto.empresa_id == usuario.empresa_id,
-            ).first()
-            if producto and producto.controla_stock and producto.stock is not None:
-                producto.stock += it.cantidad
-
-    # 2) Borrar el detalle PRIMERO (SQL directo) y asegurarlo antes de la venta
-    db.query(VentaItem).filter(VentaItem.venta_id == venta.id).delete(synchronize_session=False)
-    db.flush()
-
-    # 3) Ahora sí, borrar la venta
     db.delete(venta)
     db.commit()
     return {"mensaje": "Venta eliminada"}

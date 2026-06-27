@@ -25,7 +25,7 @@ function Login({ irARegistro }) {
     setCargando(true);
     try {
       const data = await login(username, password);
-      iniciarSesion(data.access_token, data.usuario);
+      iniciarSesion(data.usuario);
     } catch (err) {
       setError("Usuario o contraseña incorrectos");
     } finally {

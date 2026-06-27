@@ -54,7 +54,7 @@ function Registro({ irALogin }) {
         empresa_nombre: creaEmpresa ? empresaNombre : null,
         empresa_codigo: tipo === "usuario" ? empresaCodigo : null,
       });
-      iniciarSesion(data.access_token, data.usuario);
+      iniciarSesion(data.usuario);
     } catch (err) {
       const detalle = err.response?.data?.detail;
       setError(detalle || "No se pudo crear la cuenta");

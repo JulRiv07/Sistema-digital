@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { setAuthToken } from "../services/api";
+import { logout as apiLogout } from "../services/api";
 
 const AuthContext = createContext(null);
 
@@ -8,35 +8,32 @@ export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
   const [cargando, setCargando] = useState(true);
 
-  // Al cargar la app: si hay token guardado, lo validamos contra /me
+  // Al cargar la app: el cookie de acceso se envía automáticamente si existe
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setCargando(false);
-      return;
-    }
-
-    setAuthToken(token);
     axios
       .get("/me")
       .then((res) => setUsuario(res.data))
-      .catch(() => {
-        // Token inválido o expirado -> limpiar sesión
-        localStorage.removeItem("token");
-        setAuthToken(null);
-      })
+      .catch(() => {})
       .finally(() => setCargando(false));
   }, []);
 
-  const iniciarSesion = (token, datosUsuario) => {
-    localStorage.setItem("token", token);
-    setAuthToken(token);
+  // El interceptor en api.js emite este evento cuando el refresh falla
+  useEffect(() => {
+    const handleExpired = () => setUsuario(null);
+    window.addEventListener("session-expired", handleExpired);
+    return () => window.removeEventListener("session-expired", handleExpired);
+  }, []);
+
+  const iniciarSesion = (datosUsuario) => {
     setUsuario(datosUsuario);
   };
 
-  const cerrarSesion = () => {
-    localStorage.removeItem("token");
-    setAuthToken(null);
+  const cerrarSesion = async () => {
+    try {
+      await apiLogout();
+    } catch {
+      // Continuar aunque falle la llamada al backend
+    }
     setUsuario(null);
   };
 
@@ -45,7 +42,7 @@ export function AuthProvider({ children }) {
       const res = await axios.get("/me");
       setUsuario(res.data);
     } catch {
-      // si falla, no rompemos la sesión actual
+      // Si falla, no romper la sesión actual
     }
   };
 
@@ -53,14 +50,12 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!usuario) return;
 
-    const LIMITE = 30 * 60 * 1000; // 30 minutos
+    const LIMITE = 30 * 60 * 1000;
     let timer;
 
     const reiniciar = () => {
       clearTimeout(timer);
-      timer = setTimeout(() => {
-        cerrarSesion();
-      }, LIMITE);
+      timer = setTimeout(cerrarSesion, LIMITE);
     };
 
     const eventos = ["mousemove", "keydown", "click", "scroll", "touchstart"];

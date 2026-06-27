@@ -1,7 +1,17 @@
+const TIPOS_PERMITIDOS = ["image/jpeg", "image/png", "image/webp"];
+const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB
+
 // Lee un archivo de imagen y lo devuelve como data URL (base64),
 // redimensionado para que pese poco antes de guardarlo en la base.
 export function leerImagenRedimensionada(file, maxLado = 256) {
   return new Promise((resolve, reject) => {
+    if (!TIPOS_PERMITIDOS.includes(file.type)) {
+      return reject(new Error("Solo se permiten imágenes JPEG, PNG o WebP"));
+    }
+    if (file.size > MAX_SIZE_BYTES) {
+      return reject(new Error("La imagen no puede superar 2 MB"));
+    }
+
     const reader = new FileReader();
     reader.onerror = reject;
     reader.onload = (e) => {

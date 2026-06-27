@@ -1,66 +1,66 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ClienteCreate(BaseModel):
-    nombre: str
-    telefono: str | None = None
+    nombre: str = Field(..., min_length=1, max_length=100)
+    telefono: str | None = Field(None, max_length=30)
 
 
 class VentaItemIn(BaseModel):
     producto_id: int
-    cantidad: int
+    cantidad: int = Field(..., ge=1, le=10_000)
 
 
 class VentaCreate(BaseModel):
     cliente_id: int
-    tipo_pago: str
+    tipo_pago: str = Field(..., max_length=20)
     items: list[VentaItemIn]
 
 
 class ProductoCreate(BaseModel):
-    codigo: str
-    nombre: str
-    precio: float
+    codigo: str = Field(..., min_length=1, max_length=50)
+    nombre: str = Field(..., min_length=1, max_length=200)
+    precio: float = Field(..., ge=0, le=100_000_000)
     controla_stock: bool = False
-    stock: int | None = None
+    stock: int | None = Field(None, ge=0)
 
 
 class StockUpdate(BaseModel):
-    stock: int
+    stock: int = Field(..., ge=0)
 
 
 class PagoCreate(BaseModel):
     cliente_id: int
-    monto: float
+    monto: float = Field(..., gt=0, le=100_000_000)
 
 
 class GastoCreate(BaseModel):
-    descripcion: str
-    monto: float
+    descripcion: str = Field(..., min_length=1, max_length=300)
+    monto: float = Field(..., gt=0, le=100_000_000)
 
 
 class VentaUpdate(BaseModel):
-    descripcion: str
-    tipo_pago: str
-    total: float
+    descripcion: str = Field(..., min_length=1, max_length=300)
+    tipo_pago: str = Field(..., max_length=20)
+    total: float = Field(..., gt=0, le=100_000_000)
     cliente_id: int
 
 
 # ----------------- Autenticación / multiempresa -----------------
 
 class RegistroRequest(BaseModel):
-    tipo: str  # "empresario" (crea empresa) o "usuario" (se une con código)
-    nombre: str
-    username: str
-    password: str
-    email: str | None = None
-    empresa_nombre: str | None = None   # requerido si tipo == "empresario"
-    empresa_codigo: str | None = None   # requerido si tipo == "usuario"
+    tipo: str = Field(..., max_length=20)
+    nombre: str = Field(..., min_length=1, max_length=100)
+    username: str = Field(..., min_length=3, max_length=30)
+    password: str = Field(..., min_length=8, max_length=128)
+    email: str | None = Field(None, max_length=200)
+    empresa_nombre: str | None = Field(None, max_length=100)
+    empresa_codigo: str | None = Field(None, max_length=20)
 
 
 class LoginRequest(BaseModel):
-    username: str
-    password: str
+    username: str = Field(..., min_length=1, max_length=50)
+    password: str = Field(..., min_length=1, max_length=200)
 
 
 class UsuarioOut(BaseModel):
@@ -81,23 +81,23 @@ class UsuarioOut(BaseModel):
 
 
 class PerfilUpdate(BaseModel):
-    nombre: str
-    username: str
-    email: str | None = None
-    telefono: str | None = None
+    nombre: str = Field(..., min_length=1, max_length=100)
+    username: str = Field(..., min_length=3, max_length=30)
+    email: str | None = Field(None, max_length=200)
+    telefono: str | None = Field(None, max_length=30)
 
 
 class LogoUpdate(BaseModel):
-    logo: str | None = None
+    logo: str | None = Field(None, max_length=200_000)
 
 
 class PasswordChange(BaseModel):
-    actual: str
-    nueva: str
+    actual: str = Field(..., min_length=1, max_length=200)
+    nueva: str = Field(..., min_length=8, max_length=128)
 
 
 class TemaUpdate(BaseModel):
-    tema: str
+    tema: str = Field(..., max_length=20)
 
 
 class TokenResponse(BaseModel):
@@ -107,11 +107,11 @@ class TokenResponse(BaseModel):
 
 
 class EmpresaNombreUpdate(BaseModel):
-    nombre: str
+    nombre: str = Field(..., min_length=1, max_length=100)
 
 
 class RolUpdate(BaseModel):
-    rol: str
+    rol: str = Field(..., max_length=20)
 
 
 class EmpleadoOut(BaseModel):
@@ -123,3 +123,7 @@ class EmpleadoOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class LoginResponse(BaseModel):
+    usuario: UsuarioOut
