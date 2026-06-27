@@ -4,18 +4,17 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 const BACKEND = "http://127.0.0.1:8000";
 
-const API_PATHS = [
-  "/login", "/logout", "/registro", "/me",
-  "/auth", "/perfil", "/empresa",
-  "/clientes", "/ventas", "/pagos", "/gastos",
-  "/deudas", "/resumen", "/productos", "/health",
-];
-
 export default defineConfig({
   server: {
-    proxy: Object.fromEntries(
-      API_PATHS.map((path) => [path, { target: BACKEND, changeOrigin: true }])
-    ),
+    proxy: {
+      // El frontend llama a /api/... y aquí lo reenviamos al backend local
+      // quitando el prefijo /api (mismo esquema que los rewrites de Vercel).
+      "/api": {
+        target: BACKEND,
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
   },
   plugins: [
     react(),

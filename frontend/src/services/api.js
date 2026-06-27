@@ -1,12 +1,12 @@
 import axios from "axios";
 
-// En local dev, VITE_API_URL está vacío → las peticiones van al proxy de Vite (mismo origen).
-// En producción, Vercel define VITE_API_URL con la URL real del backend.
-const API_URL = import.meta.env.VITE_API_URL || "";
-if (API_URL) {
-  axios.defaults.baseURL = API_URL;
-}
-// Las cookies httpOnly se envían automáticamente (no se necesita Authorization header)
+// Todas las peticiones pasan por el MISMO origen, bajo "/api", que un proxy
+// reenvía al backend:
+//   - En local: el proxy de Vite (ver vite.config.js).
+//   - En producción: los rewrites de Vercel (ver vercel.json).
+// Así las cookies httpOnly son de primera parte y funcionan en cualquier
+// navegador (sin el bloqueo de cookies de terceros entre Vercel y Render).
+axios.defaults.baseURL = "/api";
 axios.defaults.withCredentials = true;
 
 // --- Interceptor de refresh automático ---
