@@ -28,6 +28,16 @@
   to   { transform: scale(1); opacity: 1; }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .modal-box {
+    animation: modal-fade 0.18s ease;
+  }
+  @keyframes modal-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+}
+
 .modal-title {
   margin: 0 0 16px;
   font-size: 17px;
@@ -77,13 +87,19 @@
   font-weight: 600;
   font-size: 13.5px;
   cursor: pointer;
-  transition: all 0.18s ease;
   font-family: inherit;
+  transition: background-color 160ms var(--ease-out), border-color 160ms var(--ease-out), transform 160ms var(--ease-out);
 }
 
-.btn-cancel:hover {
-  background-color: var(--c-sidebar-btn-hover);
-  border-color: var(--c-accent);
+@media (hover: hover) and (pointer: fine) {
+  .btn-cancel:hover {
+    background-color: var(--c-sidebar-btn-hover);
+    border-color: var(--c-accent);
+  }
+}
+
+.btn-cancel:active {
+  transform: scale(0.97);
 }
 
 .btn-confirm {
@@ -95,16 +111,18 @@
   font-weight: 700;
   font-size: 13.5px;
   cursor: pointer;
-  transition: all 0.18s ease;
   font-family: inherit;
+  transition: background-color 160ms var(--ease-out), transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
 }
 
-.btn-confirm:hover {
-  background-color: #b91c1c;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.30);
+@media (hover: hover) and (pointer: fine) {
+  .btn-confirm:hover {
+    background-color: #b91c1c;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.30);
+  }
 }
 
 .btn-confirm:active {
-  transform: translateY(0);
+  transform: scale(0.97);
 }

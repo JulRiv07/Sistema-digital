@@ -13,6 +13,8 @@ function VentasList() {
 
     const [mes, setMes] = useState(hoy.getMonth() + 1);
     const [año, setAño] = useState(hoy.getFullYear());
+    const [filtroCliente, setFiltroCliente] = useState("");
+    const [verResumen, setVerResumen] = useState(false);
 
     const [modalOpen, setModalOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
@@ -119,6 +121,20 @@ function VentasList() {
         setSelectedVenta(null);
     };
 
+    const ventasFiltradas = filtroCliente
+        ? ventas.filter(v => String(v.cliente_id) === filtroCliente)
+        : ventas;
+
+    const resumenClientes = clientes
+        .map(c => ({
+            id: c.id,
+            nombre: c.nombre,
+            count: ventas.filter(v => v.cliente_id === c.id).length,
+            total: ventas.filter(v => v.cliente_id === c.id).reduce((s, v) => s + v.total, 0),
+        }))
+        .filter(r => r.count > 0)
+        .sort((a, b) => b.total - a.total);
+
     return (
         <div className="ventas-container">
 
@@ -140,17 +156,58 @@ function VentasList() {
                 <option key={a} value={a}>{a}</option>
             ))}
             </select>
+
+            <select value={filtroCliente} onChange={(e) => setFiltroCliente(e.target.value)}>
+                <option value="">Todos los clientes</option>
+                {clientes.map(c => (
+                    <option key={c.id} value={String(c.id)}>{c.nombre}</option>
+                ))}
+            </select>
+
+            {ventas.length > 0 && (
+                <button
+                    className={`btn-resumen ${verResumen ? "btn-resumen--activo" : ""}`}
+                    onClick={() => setVerResumen(v => !v)}
+                >
+                    {verResumen ? "Ocultar resumen" : "Ver resumen"}
+                </button>
+            )}
         </div>
 
-        {ventas.length === 0 && (
+        {verResumen && resumenClientes.length > 0 && (
+            <div className="resumen-clientes">
+                <div className="resumen-titulo">Resumen del mes</div>
+                {resumenClientes.map(r => (
+                    <div key={r.id} className="resumen-row">
+                        <span className="resumen-nombre">{r.nombre}</span>
+                        <div className="resumen-derecha">
+                            <span className="resumen-count">
+                                {r.count} {r.count === 1 ? "venta" : "ventas"}
+                            </span>
+                            <span className="resumen-total">{fmtCurrency(r.total)}</span>
+                        </div>
+                    </div>
+                ))}
+                <div className="resumen-total-row">
+                    <span>Total</span>
+                    <span>{fmtCurrency(resumenClientes.reduce((s, r) => s + r.total, 0))}</span>
+                </div>
+            </div>
+        )}
+
+        {ventasFiltradas.length === 0 && (
             <div>No hay ventas en este mes</div>
         )}
 
         <div className="ventas-grid">
-        {ventas.map(venta => {
+        {ventasFiltradas.map((venta, index) => {
             const badge = badgeInfo(venta);
             return (
-            <div key={venta.id} className={`venta-card ${venta.tipo_pago === "credito" && !venta.saldado ? "venta-card--pendiente" : ""}`}>
+            <div
+                key={venta.id}
+                className={`venta-card ${venta.tipo_pago === "credito" && !venta.saldado ? "venta-card--pendiente" : ""}`}
+                style={{ animationDelay: `${index * 40}ms` }}
+            >
 
             <div className="venta-top">
                 <span className="venta-cliente">

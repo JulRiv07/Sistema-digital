@@ -8,8 +8,10 @@ function PagosList() {
     const hoy = new Date();
 
     const [pagos, setPagos] = useState([]);
+    const [clientes, setClientes] = useState([]);
     const [mes, setMes] = useState(hoy.getMonth() + 1);
     const [anio, setAnio] = useState(hoy.getFullYear());
+    const [filtroCliente, setFiltroCliente] = useState("");
 
     const [modalOpen, setModalOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
@@ -23,8 +25,18 @@ function PagosList() {
     };
 
     useEffect(() => {
+        axios.get("/clientes")
+            .then(res => setClientes(res.data))
+            .catch(err => console.error(err));
+    }, []);
+
+    useEffect(() => {
         cargarPagos();
     }, [mes, anio]);
+
+    const pagosFiltrados = filtroCliente
+        ? pagos.filter(p => String(p.cliente_id) === filtroCliente)
+        : pagos;
 
     const formatearFecha = (fechaISO) => {
         const fecha = new Date(fechaISO);
@@ -88,15 +100,22 @@ function PagosList() {
                     <option key={a} value={a}>{a}</option>
                 ))}
                 </select>
+
+                <select value={filtroCliente} onChange={(e) => setFiltroCliente(e.target.value)}>
+                    <option value="">Todos los clientes</option>
+                    {clientes.map(c => (
+                        <option key={c.id} value={String(c.id)}>{c.nombre}</option>
+                    ))}
+                </select>
             </div>
 
-            {pagos.length === 0 && (
+            {pagosFiltrados.length === 0 && (
                 <div>No hay pagos registrados en este mes</div>
             )}
 
             <div className="pagos-grid">
-            {pagos.map(pago => (
-                <div key={pago.id} className="pago-card">
+            {pagosFiltrados.map((pago, index) => (
+                <div key={pago.id} className="pago-card" style={{ animationDelay: `${index * 40}ms` }}>
 
                     <div className="pago-top">
                         <span>{pago.cliente_nombre}</span>
