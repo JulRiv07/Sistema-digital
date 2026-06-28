@@ -8,7 +8,7 @@ from fastapi import Cookie, FastAPI, Depends, Query, HTTPException, Request, Res
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import func, extract, or_
+from sqlalchemy import func, extract, or_, text
 from datetime import datetime
 
 from backend.models import Base, Empresa, Usuario, Cliente, Venta, Pago, Gasto, Producto, VentaItem, RefreshToken
@@ -94,6 +94,13 @@ app.add_middleware(_SecurityHeaders)
 
 
 Base.metadata.create_all(bind=engine)
+
+# Migración: agrega venta_id a Pagos si no existe
+with engine.connect() as _conn:
+    _conn.execute(text(
+        'ALTER TABLE "Pagos" ADD COLUMN IF NOT EXISTS venta_id INTEGER REFERENCES ventas(id)'
+    ))
+    _conn.commit()
 
 
 @app.get("/")
@@ -871,6 +878,7 @@ def crear_venta(
             empresa_id=usuario.empresa_id,
             usuario_id=usuario.id,
             cliente_id=venta.cliente_id,
+            venta_id=nueva_venta.id,
             monto=total,
         ))
 
@@ -904,6 +912,16 @@ def listar_ventas(
 
     ventas = query.order_by(Venta.fecha.desc()).all()
 
+    venta_ids = [v.id for v in ventas]
+    pagadas_ids = set()
+    if venta_ids:
+        pagadas_ids = {
+            r[0] for r in db.query(Pago.venta_id)
+            .filter(Pago.venta_id.in_(venta_ids))
+            .all()
+            if r[0] is not None
+        }
+
     return [
         {
             "id": v.id,
@@ -913,6 +931,7 @@ def listar_ventas(
             "fecha": v.fecha,
             "cliente_id": v.cliente_id,
             "cliente_nombre": v.cliente_nombre,
+            "saldado": v.id in pagadas_ids,
         }
         for v in ventas
     ]
@@ -954,6 +973,45 @@ def calcular_deuda(
 
 # ===================== PAGOS =====================
 
+@app.get("/clientes/{cliente_id}/ventas-credito")
+def ventas_credito_pendientes(
+    cliente_id: int,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    ventas = db.query(
+        Venta.id,
+        Venta.descripcion,
+        Venta.total,
+        Venta.fecha,
+    ).filter(
+        Venta.cliente_id == cliente_id,
+        Venta.empresa_id == usuario.empresa_id,
+        Venta.tipo_pago == "credito",
+    ).order_by(Venta.fecha.desc()).all()
+
+    venta_ids = [v.id for v in ventas]
+    pagadas_ids = set()
+    if venta_ids:
+        pagadas_ids = {
+            r[0] for r in db.query(Pago.venta_id)
+            .filter(Pago.venta_id.in_(venta_ids))
+            .all()
+            if r[0] is not None
+        }
+
+    return [
+        {
+            "id": v.id,
+            "descripcion": v.descripcion,
+            "total": v.total,
+            "fecha": v.fecha,
+        }
+        for v in ventas
+        if v.id not in pagadas_ids
+    ]
+
+
 @app.post("/pagos")
 def registrar_pago(
     pago: schemas.PagoCreate,
@@ -969,10 +1027,24 @@ def registrar_pago(
     if not cliente:
         raise HTTPException(status_code=404, detail="Cliente no existe")
 
+    if pago.venta_id is not None:
+        venta = db.query(Venta).filter(
+            Venta.id == pago.venta_id,
+            Venta.cliente_id == pago.cliente_id,
+            Venta.empresa_id == usuario.empresa_id,
+            Venta.tipo_pago == "credito",
+        ).first()
+        if not venta:
+            raise HTTPException(status_code=404, detail="Venta a crédito no encontrada")
+        ya_pagada = db.query(Pago).filter(Pago.venta_id == pago.venta_id).first()
+        if ya_pagada:
+            raise HTTPException(status_code=400, detail="Esta venta ya fue saldada")
+
     nuevo_pago = Pago(
         empresa_id=usuario.empresa_id,
         usuario_id=usuario.id,
         cliente_id=pago.cliente_id,
+        venta_id=pago.venta_id,
         monto=pago.monto,
     )
     db.add(nuevo_pago)

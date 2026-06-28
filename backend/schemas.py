@@ -32,6 +32,7 @@ class StockUpdate(BaseModel):
 class PagoCreate(BaseModel):
     cliente_id: int
     monto: float = Field(..., gt=0, le=100_000_000)
+    venta_id: int | None = None
 
 
 class GastoCreate(BaseModel):

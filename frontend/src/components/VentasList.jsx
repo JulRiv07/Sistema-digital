@@ -10,7 +10,6 @@ function VentasList() {
 
     const [ventas, setVentas] = useState([]);
     const [clientes, setClientes] = useState([]);
-    const [clientesConDeuda, setClientesConDeuda] = useState(new Set());
 
     const [mes, setMes] = useState(hoy.getMonth() + 1);
     const [año, setAño] = useState(hoy.getFullYear());
@@ -36,16 +35,9 @@ function VentasList() {
         .catch(err => console.error(err));
     };
 
-    const cargarDeudas = () => {
-        axios.get("/deudas")
-        .then(res => setClientesConDeuda(new Set(res.data.map(d => d.id))))
-        .catch(err => console.error(err));
-    };
-
     useEffect(() => {
         cargarVentas();
         cargarClientes();
-        cargarDeudas();
     }, [mes, año]);
 
     const formatearFecha = (fechaISO) => {
@@ -61,10 +53,10 @@ function VentasList() {
         if (venta.tipo_pago === "contado") {
             return { texto: "Contado ✓", clase: "badge-verde" };
         }
-        if (clientesConDeuda.has(venta.cliente_id)) {
-            return { texto: "Crédito · Pendiente", clase: "badge-rojo" };
+        if (venta.saldado) {
+            return { texto: "Crédito · Saldado", clase: "badge-verde" };
         }
-        return { texto: "Crédito · Saldado", clase: "badge-verde" };
+        return { texto: "Crédito · Pendiente", clase: "badge-rojo" };
     };
 
     const abrirEditar = (venta) => {
@@ -158,7 +150,7 @@ function VentasList() {
         {ventas.map(venta => {
             const badge = badgeInfo(venta);
             return (
-            <div key={venta.id} className={`venta-card ${venta.tipo_pago === "credito" && clientesConDeuda.has(venta.cliente_id) ? "venta-card--pendiente" : ""}`}>
+            <div key={venta.id} className={`venta-card ${venta.tipo_pago === "credito" && !venta.saldado ? "venta-card--pendiente" : ""}`}>
 
             <div className="venta-top">
                 <span className="venta-cliente">

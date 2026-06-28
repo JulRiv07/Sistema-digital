@@ -70,6 +70,7 @@ class Pago(Base):
     empresa_id = Column(Integer, ForeignKey("empresas.id"), nullable=False)
     usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
     cliente_id = Column(Integer, ForeignKey("clientes.id"))
+    venta_id = Column(Integer, ForeignKey("ventas.id"), nullable=True)
     fecha = Column(DateTime(timezone=True), server_default=func.now())
     monto = Column(Float, nullable=False)
 
