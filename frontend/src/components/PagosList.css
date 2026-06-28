@@ -5,6 +5,18 @@
   color: var(--c-text);
 }
 
+.pagos-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 900px) {
+  .pagos-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 /* ── Título sección ────────────────────────────────────────── */
 .pagos-title {
   font-size: 16px;

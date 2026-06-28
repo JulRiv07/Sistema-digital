@@ -94,6 +94,7 @@ function PagosList() {
                 <div>No hay pagos registrados en este mes</div>
             )}
 
+            <div className="pagos-grid">
             {pagos.map(pago => (
                 <div key={pago.id} className="pago-card">
 
@@ -118,6 +119,7 @@ function PagosList() {
 
                 </div>
             ))}
+            </div>
 
             <Modal
                 isOpen={modalOpen}

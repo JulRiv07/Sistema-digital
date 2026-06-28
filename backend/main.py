@@ -887,6 +887,55 @@ def crear_venta(
     return nueva_venta
 
 
+def saldados_para_cliente(cliente_id: int, empresa_id: int, db: Session) -> set:
+    """Devuelve IDs de ventas crédito efectivamente saldadas, usando FIFO para pagos viejos."""
+    todas_credito = db.query(Venta.id, Venta.total).filter(
+        Venta.cliente_id == cliente_id,
+        Venta.empresa_id == empresa_id,
+        Venta.tipo_pago == "credito",
+    ).order_by(Venta.fecha.asc(), Venta.id.asc()).all()
+
+    if not todas_credito:
+        return set()
+
+    venta_ids = [v.id for v in todas_credito]
+
+    # Ventas ya saldadas con el nuevo sistema (pago vinculado por venta_id)
+    pagadas_explicitas = {
+        r[0] for r in db.query(Pago.venta_id)
+        .filter(Pago.venta_id.in_(venta_ids))
+        .all()
+        if r[0] is not None
+    }
+
+    # Deuda real del cliente (ventas - pagos totales, incluyendo pagos viejos sin venta_id)
+    total_ventas = db.query(func.sum(Venta.total)).filter(
+        Venta.cliente_id == cliente_id,
+        Venta.empresa_id == empresa_id,
+    ).scalar() or 0
+    total_pagos = db.query(func.sum(Pago.monto)).filter(
+        Pago.cliente_id == cliente_id,
+        Pago.empresa_id == empresa_id,
+    ).scalar() or 0
+    deuda_residual = max(0, total_ventas - total_pagos)
+
+    # Las ventas crédito sin pago explícito que cubren los pagos viejos (FIFO: más antiguas primero)
+    sin_explicitas = [v for v in todas_credito if v.id not in pagadas_explicitas]
+    total_sin_explicitas = sum(v.total for v in sin_explicitas)
+    cubierto_por_viejos = max(0, total_sin_explicitas - deuda_residual)
+
+    pagadas_fifo = set()
+    restante = cubierto_por_viejos
+    for v in sin_explicitas:
+        if restante >= v.total:
+            pagadas_fifo.add(v.id)
+            restante -= v.total
+        else:
+            break
+
+    return pagadas_explicitas | pagadas_fifo
+
+
 @app.get("/ventas")
 def listar_ventas(
     mes: int = None,
@@ -912,15 +961,11 @@ def listar_ventas(
 
     ventas = query.order_by(Venta.fecha.desc()).all()
 
-    venta_ids = [v.id for v in ventas]
-    pagadas_ids = set()
-    if venta_ids:
-        pagadas_ids = {
-            r[0] for r in db.query(Pago.venta_id)
-            .filter(Pago.venta_id.in_(venta_ids))
-            .all()
-            if r[0] is not None
-        }
+    # Calcular saldados con FIFO por cliente (pagos viejos sin venta_id incluidos)
+    clientes_unicos = list(set(v.cliente_id for v in ventas))
+    saldados_global: set = set()
+    for cid in clientes_unicos:
+        saldados_global |= saldados_para_cliente(cid, usuario.empresa_id, db)
 
     return [
         {
@@ -931,7 +976,7 @@ def listar_ventas(
             "fecha": v.fecha,
             "cliente_id": v.cliente_id,
             "cliente_nombre": v.cliente_nombre,
-            "saldado": v.id in pagadas_ids,
+            "saldado": v.id in saldados_global,
         }
         for v in ventas
     ]
@@ -990,15 +1035,7 @@ def ventas_credito_pendientes(
         Venta.tipo_pago == "credito",
     ).order_by(Venta.fecha.desc()).all()
 
-    venta_ids = [v.id for v in ventas]
-    pagadas_ids = set()
-    if venta_ids:
-        pagadas_ids = {
-            r[0] for r in db.query(Pago.venta_id)
-            .filter(Pago.venta_id.in_(venta_ids))
-            .all()
-            if r[0] is not None
-        }
+    saldados = saldados_para_cliente(cliente_id, usuario.empresa_id, db)
 
     return [
         {
@@ -1008,7 +1045,7 @@ def ventas_credito_pendientes(
             "fecha": v.fecha,
         }
         for v in ventas
-        if v.id not in pagadas_ids
+        if v.id not in saldados
     ]
 
 
