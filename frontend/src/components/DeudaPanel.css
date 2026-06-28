@@ -1,31 +1,56 @@
+/* ── Título subsección dentro del form ─────────────────────── */
 .form-container h3 {
-    background-color: var(--c-label-bg);
-    padding: 5px 15px;
-    font-size: 15px;
-    color: var(--c-text);
-    border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--c-title);
+  background: none;
+  border-radius: 0;
+  padding: 0 0 8px;
+  border-bottom: 2px solid var(--c-border);
+  margin-bottom: 4px;
 }
 
+/* ── Card deuda ────────────────────────────────────────────── */
 .deuda-card {
-    color: var(--c-text);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: var(--c-soft);
-    padding: 12px;
-    border-radius: 12px;
-    margin-bottom: 10px;
+  color: var(--c-text);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--c-surface);
+  border: 1.5px solid var(--c-border);
+  padding: 13px 15px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  box-shadow: var(--c-card-shadow);
+  transition: box-shadow 0.18s ease;
 }
 
+.deuda-card:hover {
+  box-shadow: var(--c-card-shadow-hover);
+}
+
+/* ── Botón marcar pagada ───────────────────────────────────── */
 .deuda-card button {
-    background-color: var(--c-accent);
-    border: none;
-    padding: 8px 12px;
-    border-radius: 10px;
-    color: white;
-    cursor: pointer;
+  background: linear-gradient(135deg, var(--c-accent), var(--c-accent-hover));
+  border: none;
+  padding: 7px 14px;
+  border-radius: 8px;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
 }
 
 .deuda-card button:hover {
-    background-color: var(--c-accent-hover);
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px var(--c-accent-light);
+}
+
+.deuda-card button:active {
+  transform: translateY(0);
 }

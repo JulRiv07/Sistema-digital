@@ -1,55 +1,83 @@
 .cliente-form-container {
-    background-color: var(--c-soft);
-    padding: 20px;
-    border-radius: 18px;
-    box-shadow: 0px 8px 18px rgba(0, 0, 0, 0.08);
-    max-width: 500px;
-    margin: auto;
+  background-color: var(--c-surface);
+  padding: 22px;
+  border-radius: 16px;
+  box-shadow: var(--c-card-shadow);
+  border: 1px solid var(--c-border);
+  max-width: 500px;
+  margin: auto;
 }
 
+/* ── Título ────────────────────────────────────────────────── */
 .cliente-form-title {
-    background-color: var(--c-label-bg);
-    color: var(--c-text);
-    padding: 12px 15px;
-    border-radius: 14px;
-    font-weight: bold;
-    margin-bottom: 18px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--c-title);
+  background: none;
+  border-radius: 0;
+  padding: 0 0 10px;
+  margin: 0 0 16px;
+  border-bottom: 2px solid var(--c-border);
 }
 
+/* ── Labels ────────────────────────────────────────────────── */
 .cliente-form-container label {
-    font-weight: 600;
-    margin-top: 8px;
-    color: var(--c-title);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--c-muted);
+  display: block;
+  margin-bottom: 4px;
 }
 
+/* ── Inputs ────────────────────────────────────────────────── */
 .cliente-form-container input {
-    padding: 12px;
-    border-radius: 14px;
-    border: 1px solid var(--c-input-border);
-    background-color: var(--c-input-bg);
-    color: var(--c-text);
-    font-size: 14px;
-    transition: 0.2s ease;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--c-input-border);
+  background-color: var(--c-input-bg);
+  color: var(--c-text);
+  font-size: 14px;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  outline: none;
+}
+
+.cliente-form-container input:hover {
+  border-color: var(--c-accent);
 }
 
 .cliente-form-container input:focus {
-    border-color: var(--c-accent);
-    outline: none;
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px var(--c-accent-light);
 }
 
+/* ── Botón ─────────────────────────────────────────────────── */
 .cliente-form-container button {
-    margin-top: 15px;
-    padding: 14px;
-    border-radius: 14px;
-    border: none;
-    background-color: var(--c-accent);
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s ease;
+  margin-top: 14px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, var(--c-accent), var(--c-accent-hover));
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14.5px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
+  width: 100%;
+  box-shadow: 0 4px 14px var(--c-accent-light);
 }
 
 .cliente-form-container button:hover {
-    background-color: var(--c-accent-hover);
-    transform: translateY(-2px);
+  filter: brightness(1.07);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px var(--c-accent-light);
+}
+
+.cliente-form-container button:active {
+  transform: translateY(0);
 }

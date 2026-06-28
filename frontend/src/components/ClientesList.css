@@ -1,58 +1,74 @@
 .clientes-container {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
+/* ── Título sección ────────────────────────────────────────── */
 .clientes-title {
-    background-color: var(--c-label-bg);
-    padding: 10px 15px;
-    border-radius: 12px;
-    font-weight: bold;
-    color: var(--c-text);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--c-title);
+  padding: 0 0 8px;
+  border-bottom: 2px solid var(--c-border);
+  margin-bottom: 2px;
 }
 
+/* ── Card cliente ──────────────────────────────────────────── */
 .cliente-card {
-    background-color: var(--c-soft);
-    padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.08);
-    transition: 0.2s ease;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  background-color: var(--c-surface);
+  border: 1.5px solid var(--c-border);
+  padding: 14px 16px;
+  border-radius: 14px;
+  box-shadow: var(--c-card-shadow);
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 
 .cliente-card:hover {
-    transform: translateY(-3px);
+  transform: translateY(-2px);
+  box-shadow: var(--c-card-shadow-hover);
 }
 
 .cliente-info {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .cliente-nombre {
-    font-weight: 600;
-    font-size: 16px;
-    color: var(--c-title);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--c-title);
 }
 
 .cliente-telefono {
-    font-size: 14px;
-    color: var(--c-muted);
-    margin-top: 4px;
+  font-size: 13px;
+  color: var(--c-muted);
+  font-weight: 400;
 }
 
+/* ── Botón eliminar ────────────────────────────────────────── */
 .btn-delete {
-    background: #d9534f;
-    border: none;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 8px;
-    cursor: pointer;
+  background-color: var(--c-danger-bg, #fef2f2);
+  border: 1.5px solid var(--c-danger-border, #fca5a5);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-danger, #dc2626);
+  transition: all 0.18s ease;
+  font-family: inherit;
+  flex-shrink: 0;
 }
 
 .btn-delete:hover {
-    background: #c9302c;
+  background-color: var(--c-danger, #dc2626);
+  color: #ffffff;
+  border-color: transparent;
 }

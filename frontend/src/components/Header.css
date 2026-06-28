@@ -1,38 +1,45 @@
 .header {
-  background-color: var(--c-header-bg);
+  background: var(--c-header-gradient, linear-gradient(135deg, #881337 0%, #e11d48 100%));
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 14px 40px;
+  gap: 8px;
+  padding: 16px 40px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
 }
 
+/* ── Chip de la app (Controla) ─────────────────────────────── */
 .header-app {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.92);
-  padding: 5px 14px 5px 7px;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 4px 12px 4px 6px;
   border-radius: 999px;
-  box-shadow: 0 3px 10px rgba(40, 30, 80, 0.18);
+  transition: background 0.18s ease;
+}
+
+.header-app:hover {
+  background: rgba(255, 255, 255, 0.26);
 }
 
 .header-app-logo {
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
 }
 
 .header-app-name {
-  font-weight: 800;
-  font-size: 17px;
-  letter-spacing: 0.3px;
-  background: linear-gradient(90deg, #4338ca, #2563eb);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+  color: #ffffff;
 }
 
+/* ── Marca de la empresa ───────────────────────────────────── */
 .header-brand {
   display: flex;
   align-items: center;
@@ -41,55 +48,64 @@
 }
 
 .header-logo {
-  width: 160px;
+  width: 140px;
   height: auto;
-  max-height: 140px;
+  max-height: 110px;
   object-fit: contain;
   flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.25));
 }
 
 .header-title {
-  font-size: 40px;
-  font-weight: bold;
+  font-size: 36px;
+  font-weight: 800;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--c-title);
+  color: var(--c-header-text, #ffffff);
   margin: 0;
   line-height: 1.1;
   text-align: center;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.20);
 }
 
+/* ── Usuario y logout ──────────────────────────────────────── */
 .header-user {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .header-username {
   font-weight: 600;
-  color: var(--c-title);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.90);
 }
 
 .header-logout {
-  background-color: var(--c-accent);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 7px 14px;
-  font-weight: bold;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.30);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-weight: 600;
+  font-size: 13px;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: all 0.18s ease;
   white-space: nowrap;
+  letter-spacing: 0.2px;
 }
 
 .header-logout:hover {
-  background-color: var(--c-accent-hover);
+  background: rgba(255, 255, 255, 0.30);
+  border-color: rgba(255, 255, 255, 0.50);
 }
 
-/* 📱 Mobile */
+/* ── Mobile ────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .header {
     padding: 12px 16px;
+    gap: 6px;
   }
 
   .header-brand {
@@ -97,21 +113,21 @@
   }
 
   .header-logo {
-    width: 100px;
-    max-height: 90px;
+    width: 90px;
+    max-height: 80px;
   }
 
   .header-title {
-    font-size: 24px;
+    font-size: 22px;
     letter-spacing: 1px;
   }
 
   .header-username {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .header-logout {
-    padding: 6px 12px;
-    font-size: 13px;
+    padding: 5px 11px;
+    font-size: 12px;
   }
 }

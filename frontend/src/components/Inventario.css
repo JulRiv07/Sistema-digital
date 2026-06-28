@@ -1,55 +1,73 @@
 .inv-panel {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
   width: 100%;
   text-align: left;
 }
 
 .inv-title {
   color: var(--c-title);
-  margin: 0;
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 800;
 }
 
+/* ── Aviso ─────────────────────────────────────────────────── */
 .inv-aviso {
-  background: var(--c-soft);
+  background: var(--c-accent-light);
   color: var(--c-title);
-  border-radius: 10px;
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
   padding: 10px 14px;
   font-weight: 600;
+  font-size: 14px;
 }
 
+/* ── Card sección ──────────────────────────────────────────── */
 .inv-card {
   background: var(--c-surface);
   border-radius: 16px;
-  padding: 18px 20px;
-  box-shadow: 0 6px 18px rgba(120, 90, 90, 0.15);
+  padding: 20px 22px;
+  box-shadow: var(--c-card-shadow);
+  border: 1px solid var(--c-border);
 }
 
 .inv-card h3 {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   color: var(--c-title);
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .inv-vacio {
   color: var(--c-muted);
-  margin: 8px 0 0;
+  margin: 4px 0 0;
+  font-size: 14px;
 }
 
+/* ── Buscador ──────────────────────────────────────────────── */
 .inv-buscar {
   width: 100%;
   box-sizing: border-box;
-  padding: 11px 14px;
-  border-radius: 12px;
-  border: 1px solid var(--c-input-border);
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--c-input-border);
   background-color: var(--c-input-bg);
   color: var(--c-text);
   font-size: 14px;
+  font-family: inherit;
   outline: none;
   margin-bottom: 12px;
+  transition: border-color 0.18s, box-shadow 0.18s;
 }
 
-/* Checkbox de control de stock (sin el "chip" de las labels) */
+.inv-buscar:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px var(--c-accent-light);
+}
+
+/* ── Checkbox de control de stock ──────────────────────────── */
 .form-container label.inv-check {
   background: none;
   border-radius: 0;
@@ -59,40 +77,59 @@
   gap: 8px;
   font-weight: 600;
   color: var(--c-title);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 14px;
 }
+
 .form-container label.inv-check input {
   width: auto;
 }
 
+/* ── Botón cancelar dentro del inventario ──────────────────── */
 .inv-cancelar {
   margin-top: 8px !important;
-  background-color: var(--c-soft) !important;
+  background: var(--c-sidebar-btn) !important;
   color: var(--c-title) !important;
+  border: 1.5px solid var(--c-border) !important;
+  box-shadow: none !important;
 }
 
+.inv-cancelar:hover {
+  background: var(--c-sidebar-btn-hover) !important;
+}
+
+/* ── Item de inventario ────────────────────────────────────── */
 .inv-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid var(--c-input-border);
+  border-bottom: 1px solid var(--c-border);
   flex-wrap: wrap;
 }
+
 .inv-item:last-child {
   border-bottom: none;
+  padding-bottom: 0;
 }
 
 .inv-item-info {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
+
 .inv-item-nombre {
   font-weight: 700;
+  font-size: 14.5px;
   color: var(--c-title);
 }
+
 .inv-item-cod {
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--c-muted);
 }
 
@@ -100,72 +137,104 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  gap: 2px;
 }
+
 .inv-item-precio {
-  font-weight: 700;
+  font-weight: 800;
+  font-size: 15px;
   color: var(--c-title);
+  font-variant-numeric: tabular-nums;
 }
+
 .inv-item-stock {
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--c-muted);
 }
 
 .inv-item-acciones {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
+/* ── Botones de acción ─────────────────────────────────────── */
 .inv-btn-edit {
-  background: var(--c-soft);
+  background: var(--c-sidebar-btn);
   color: var(--c-title);
-  border: none;
-  border-radius: 10px;
+  border: 1.5px solid var(--c-border);
+  border-radius: 9px;
   padding: 6px 12px;
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
 }
+
 .inv-btn-edit:hover {
-  background: var(--c-label-bg);
+  background: var(--c-sidebar-btn-hover);
+  border-color: var(--c-accent);
 }
 
 .inv-btn-del {
-  background: #f0d0d0;
-  color: #a52f23;
-  border: none;
-  border-radius: 10px;
+  background: var(--c-danger-bg, #fef2f2);
+  color: var(--c-danger, #dc2626);
+  border: 1.5px solid var(--c-danger-border, #fca5a5);
+  border-radius: 9px;
   padding: 6px 12px;
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
-}
-.inv-btn-del:hover {
-  background: #e9bcbc;
+  transition: all 0.18s ease;
+  font-family: inherit;
 }
 
+.inv-btn-del:hover {
+  background: var(--c-danger, #dc2626);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+/* ── Control de stock inline ───────────────────────────────── */
 .inv-stock-row {
   display: flex;
   gap: 6px;
   align-items: center;
 }
+
 .inv-stock-row input {
   width: 80px;
   padding: 7px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--c-input-border);
+  border-radius: 9px;
+  border: 1.5px solid var(--c-input-border);
   background-color: var(--c-input-bg);
   color: var(--c-text);
+  font-family: inherit;
+  font-size: 13.5px;
+  outline: none;
+  text-align: center;
+  transition: border-color 0.18s;
 }
+
+.inv-stock-row input:focus {
+  border-color: var(--c-accent);
+}
+
 .inv-stock-row button {
-  background: var(--c-accent);
-  color: white;
+  background: linear-gradient(135deg, var(--c-accent), var(--c-accent-hover));
+  color: #ffffff;
   border: none;
-  border-radius: 10px;
-  padding: 7px 12px;
-  font-weight: 600;
+  border-radius: 9px;
+  padding: 7px 14px;
+  font-weight: 700;
   font-size: 13px;
   cursor: pointer;
+  font-family: inherit;
+  transition: all 0.18s ease;
 }
+
 .inv-stock-row button:hover {
-  background: var(--c-accent-hover);
+  filter: brightness(1.08);
+  transform: translateY(-1px);
 }

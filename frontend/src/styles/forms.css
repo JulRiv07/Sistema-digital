@@ -1,64 +1,98 @@
-/* Contenedor general de formularios */
+/* ── Contenedor ────────────────────────────────────────────── */
 .form-container {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  max-width: 560px;
+  gap: 12px;
+  max-width: 540px;
   margin-left: auto;
   margin-right: auto;
   text-align: left;
 }
 
-/* Labels */
+/* ── Labels ────────────────────────────────────────────────── */
 .form-container label {
-  font-size: 15px;
-  font-weight: 500;
-  padding: 6px 10px;
-  border-radius: 10px;
-  background-color: var(--c-label-bg);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--c-muted);
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: -4px;
 }
 
-/* Inputs y selects */
+/* ── Inputs y selects ──────────────────────────────────────── */
 .form-container input,
 .form-container select {
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px solid var(--c-input-border);
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--c-input-border);
   background-color: var(--c-input-bg);
   color: var(--c-text);
-  font-size: 14px;
+  font-size: 14.5px;
+  font-weight: 400;
   outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* Focus */
-.form-container input:focus,
-.form-container select:focus {
+.form-container input:hover,
+.form-container select:hover {
   border-color: var(--c-accent);
 }
 
-/* Evita el fondo gris/azul que el navegador pone al autocompletar */
+/* ── Focus ─────────────────────────────────────────────────── */
+.form-container input:focus,
+.form-container select:focus {
+  border-color: var(--c-input-focus, var(--c-accent));
+  box-shadow: 0 0 0 3px var(--c-accent-light);
+}
+
+/* ── Autofill override ─────────────────────────────────────── */
 .form-container input:-webkit-autofill,
 .form-container input:-webkit-autofill:hover,
 .form-container input:-webkit-autofill:focus {
-  -webkit-text-fill-color: #000;
+  -webkit-text-fill-color: var(--c-text);
   -webkit-box-shadow: 0 0 0 1000px var(--c-input-bg) inset;
   box-shadow: 0 0 0 1000px var(--c-input-bg) inset;
   transition: background-color 9999s ease-in-out 0s;
 }
 
-/* Botón principal */
+/* ── Botón principal ───────────────────────────────────────── */
+/* Especificidad (0,1,1) — intencionalmente menor que Auth.css (0,2,1)
+   para que el login mantenga su estilo azul sin ser sobreescrito. */
 .form-container button {
-  margin-top: 10px;
-  padding: 12px;
-  background-color: var(--c-accent);
+  margin-top: 6px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, var(--c-accent), var(--c-accent-hover));
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
-  font-weight: bold;
-  color: white;
-  transition: 0.2s ease;
+  font-weight: 700;
+  font-size: 14.5px;
+  color: #ffffff;
+  transition: all 0.18s ease;
+  box-shadow: 0 4px 14px var(--c-accent-light);
+  letter-spacing: 0.2px;
 }
 
 .form-container button:hover {
-    background-color: var(--c-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px var(--c-accent-light);
+  filter: brightness(1.05);
+}
+
+.form-container button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px var(--c-accent-light);
+}
+
+.form-container button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  filter: none;
 }

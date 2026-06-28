@@ -1,53 +1,95 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  width: 240px;
+  gap: 6px;
+  width: 220px;
   flex-shrink: 0;
 }
 
-/* Botones */
+/* ── Botones ───────────────────────────────────────────────── */
 .sidebar-button {
   display: flex;
   align-items: center;
-  gap: 12px;
-
+  gap: 10px;
   background-color: var(--c-sidebar-btn);
   color: var(--c-text);
-  border: none;
-  padding: 13px 16px;
-  border-radius: 16px;
-  font-size: 16px;
+  border: 1.5px solid transparent;
+  padding: 11px 14px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-button::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  height: 60%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--c-accent);
+  transform: scaleY(0);
+  transition: transform 0.18s ease;
 }
 
 .sidebar-button:hover {
   background-color: var(--c-sidebar-btn-hover);
-  transform: scale(1.03);
+  color: var(--c-title);
+  transform: translateX(2px);
 }
 
 .sidebar-button.active {
   background-color: var(--c-sidebar-btn-active);
+  color: var(--c-sidebar-active-text);
+  font-weight: 700;
+  border-color: var(--c-border);
 }
 
+.sidebar-button.active::before {
+  transform: scaleY(1);
+}
+
+/* ── Icono ─────────────────────────────────────────────────── */
 .button-icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  opacity: 0.8;
 }
 
+.sidebar-button.active .button-icon,
+.sidebar-button:hover .button-icon {
+  opacity: 1;
+}
+
+/* ── Mobile ────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+    gap: 8px;
   }
 
   .sidebar-button {
-    padding: 15px;
-    font-size: 14px;
+    padding: 12px 14px;
+    font-size: 13.5px;
     justify-content: center;
+    border-radius: 10px;
+  }
+
+  .sidebar-button::before {
+    display: none;
+  }
+
+  .sidebar-button:hover {
+    transform: none;
   }
 
   .button-icon {
@@ -55,4 +97,3 @@
     height: 16px;
   }
 }
-

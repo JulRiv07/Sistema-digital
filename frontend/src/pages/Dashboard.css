@@ -8,19 +8,20 @@
 .main-area {
   flex: 1;
   width: 100%;
-  max-width: 1000px;
+  max-width: 1060px;
   margin: 0 auto;
   box-sizing: border-box;
   background-color: var(--c-bg);
   display: flex;
-  gap: 28px;
-  padding: 28px 32px;
+  gap: 20px;
+  padding: 24px 28px;
   align-items: flex-start;
 }
 
 @media (max-width: 768px) {
   .main-area {
     flex-direction: column;
-    padding: 20px;
+    padding: 16px;
+    gap: 16px;
   }
 }

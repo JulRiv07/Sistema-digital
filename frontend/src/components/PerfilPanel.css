@@ -1,47 +1,61 @@
 .perfil-panel {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
   width: 100%;
 }
 
 .perfil-title {
   color: var(--c-title);
-  margin: 0;
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 800;
 }
 
+/* ── Card sección ──────────────────────────────────────────── */
 .perfil-card {
   background: var(--c-surface);
   border-radius: 16px;
-  padding: 18px 20px;
-  box-shadow: 0 6px 18px rgba(120, 90, 90, 0.15);
+  padding: 20px 22px;
+  box-shadow: var(--c-card-shadow);
+  border: 1px solid var(--c-border);
 }
 
 .perfil-card h3 {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   color: var(--c-title);
+  font-size: 15px;
+  font-weight: 700;
 }
 
+/* ── Aviso ─────────────────────────────────────────────────── */
 .perfil-aviso {
-  background: var(--c-soft);
+  background: var(--c-accent-light);
   color: var(--c-title);
+  border: 1px solid var(--c-border);
   border-radius: 10px;
-  padding: 8px 12px;
-  margin-bottom: 12px;
+  padding: 9px 14px;
+  margin-bottom: 14px;
   font-weight: 600;
+  font-size: 13.5px;
 }
 
+/* ── Error ─────────────────────────────────────────────────── */
 .perfil-error {
-  background: #f7e0e0;
-  color: #b04a4a;
-  border: 1px solid #e3b9b9;
+  background: var(--c-danger-bg, #fef2f2);
+  color: var(--c-danger, #dc2626);
+  border: 1px solid var(--c-danger-border, #fca5a5);
   border-radius: 10px;
-  padding: 8px 12px;
-  margin-bottom: 12px;
+  padding: 9px 14px;
+  margin-bottom: 14px;
+  font-size: 13.5px;
+  font-weight: 500;
 }
 
+/* ── Hint ──────────────────────────────────────────────────── */
 .perfil-hint {
-  margin: -4px 0 0;
+  margin: -6px 0 0;
   font-size: 12px;
   color: var(--c-muted);
+  font-weight: 400;
 }

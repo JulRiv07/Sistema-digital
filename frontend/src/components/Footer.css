@@ -1,22 +1,22 @@
-
 .footer {
-  background-color: var(--c-footer-bg);
+  background: var(--c-header-gradient, linear-gradient(135deg, #881337 0%, #e11d48 100%));
   text-align: center;
   font-weight: 500;
-  letter-spacing: 1px;
-  padding: 15px 60px;
-  color: var(--c-title);
+  letter-spacing: 0.5px;
+  padding: 14px 40px;
 }
 
 .footer-frase {
   font-style: italic;
   font-weight: 600;
-  font-size: 15px;
-  margin: 0 0 8px;
+  font-size: 14px;
+  margin: 0 0 5px;
+  color: var(--c-header-text, #ffffff);
+  opacity: 0.90;
 }
 
 .footer-info {
   margin: 0;
-  font-size: 13px;
-  opacity: 0.85;
+  font-size: 12px;
+  color: var(--c-footer-text, rgba(255,255,255,0.70));
 }

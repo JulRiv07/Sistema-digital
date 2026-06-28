@@ -1,94 +1,129 @@
 .gastos-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    color: var(--c-text);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--c-text);
 }
 
+/* ── Título sección ────────────────────────────────────────── */
 .gastos-title {
-    background-color: var(--c-label-bg);
-    padding: 10px 15px;
-    border-radius: 12px;
-    font-weight: bold;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--c-title);
+  padding: 0 0 8px;
+  border-bottom: 2px solid var(--c-border);
+  margin-bottom: 2px;
 }
 
+/* ── Card de gasto ─────────────────────────────────────────── */
 .gasto-card {
-    background-color: var(--c-soft);
-    padding: 15px;
-    border-radius: 15px;
-    box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.08);
-    transition: 0.2s ease;
+  background-color: var(--c-surface);
+  border: 1.5px solid var(--c-border);
+  padding: 14px 16px;
+  border-radius: 14px;
+  box-shadow: var(--c-card-shadow);
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .gasto-card:hover {
-    transform: translateY(-3px);
+  transform: translateY(-2px);
+  box-shadow: var(--c-card-shadow-hover);
 }
 
 .gasto-top {
-    display: flex;
-    justify-content: space-between;
-    font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-weight: 600;
+  font-size: 14.5px;
 }
 
 .gasto-monto {
-    color: #b00020;
-    text-align: right;
+  color: var(--c-danger, #dc2626);
+  font-weight: 700;
+  font-size: 15px;
+  text-align: right;
 }
 
 .gasto-fecha {
-    margin-top: 6px;
-    font-size: 12px;
-    color: var(--c-muted);
+  margin-top: 5px;
+  font-size: 12.5px;
+  color: var(--c-muted);
+  font-weight: 400;
 }
 
+/* ── Filtros ───────────────────────────────────────────────── */
 .filtros {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .filtros select {
-    padding: 8px;
-    border-radius: 10px;
-    border: 1px solid var(--c-input-border);
-    background-color: var(--c-input-bg);
-    color: var(--c-text);
+  padding: 8px 12px;
+  border-radius: 9px;
+  border: 1.5px solid var(--c-input-border);
+  background-color: var(--c-input-bg);
+  color: var(--c-text);
+  font-size: 13.5px;
+  font-family: inherit;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.18s ease;
 }
 
-.btn-delete {
-    margin-top: 8px;
-    background-color: #d9534f;
-    border: none;
-    border-radius: 8px;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-size: 12px;
-    color: white;
+.filtros select:focus {
+  border-color: var(--c-accent);
 }
 
-.btn-delete:hover {
-    background-color: #c9302c;
+/* ── Acciones ──────────────────────────────────────────────── */
+.acciones {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .btn-edit {
-    margin-top: 8px;
-    margin-right: 8px;
-    background-color: var(--c-accent);
-    border: none;
-    border-radius: 10px;
-    padding: 6px 14px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    color: white;
-    transition: 0.2s ease;
+  background-color: var(--c-accent);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  transition: all 0.18s ease;
+  font-family: inherit;
 }
 
 .btn-edit:hover {
-    background-color: var(--c-accent-hover);
-    transform: translateY(-2px);
+  background-color: var(--c-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px var(--c-accent-light);
 }
 
 .btn-edit:active {
-    transform: scale(0.95);
+  transform: translateY(0);
+}
+
+.btn-delete {
+  background-color: var(--c-danger-bg, #fef2f2);
+  border: 1.5px solid var(--c-danger-border, #fca5a5);
+  border-radius: 8px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-danger, #dc2626);
+  transition: all 0.18s ease;
+  font-family: inherit;
+}
+
+.btn-delete:hover {
+  background-color: var(--c-danger, #dc2626);
+  color: #ffffff;
+  border-color: transparent;
 }

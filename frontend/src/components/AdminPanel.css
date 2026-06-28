@@ -1,41 +1,55 @@
 .admin-panel {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
   width: 100%;
 }
 
 .admin-title {
   color: var(--c-title);
-  margin: 0;
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 800;
 }
 
+/* ── Aviso info ─────────────────────────────────────────────── */
 .admin-aviso {
-  background: var(--c-soft);
+  background: var(--c-accent-light);
   color: var(--c-title);
-  border-radius: 10px;
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
   padding: 10px 14px;
   font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+/* ── Card sección ──────────────────────────────────────────── */
 .admin-card {
   background: var(--c-surface);
   border-radius: 16px;
-  padding: 18px 20px;
-  box-shadow: 0 6px 18px rgba(120, 90, 90, 0.15);
+  padding: 20px 22px;
+  box-shadow: var(--c-card-shadow);
+  border: 1px solid var(--c-border);
 }
 
 .admin-card h3 {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   color: var(--c-title);
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .admin-desc {
-  margin: 0 0 12px;
-  font-size: 14px;
+  margin: 0 0 14px;
+  font-size: 13.5px;
   color: var(--c-muted);
+  line-height: 1.5;
 }
 
+/* ── Código / código de invitación ─────────────────────────── */
 .admin-codigo-row {
   display: flex;
   align-items: center;
@@ -44,15 +58,18 @@
 }
 
 .admin-codigo {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   color: var(--c-accent);
-  background: var(--c-soft);
-  padding: 8px 16px;
+  background: var(--c-accent-light);
+  border: 1.5px solid var(--c-border);
+  padding: 8px 18px;
   border-radius: 10px;
+  font-variant-numeric: tabular-nums;
 }
 
+/* ── Inputs inline ─────────────────────────────────────────── */
 .admin-inline {
   display: flex;
   gap: 10px;
@@ -62,29 +79,47 @@
 .admin-inline input {
   flex: 1;
   min-width: 200px;
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px solid var(--c-input-border);
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--c-input-border);
   background-color: var(--c-input-bg);
   color: var(--c-text);
   font-size: 14px;
+  font-family: inherit;
   outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
 }
 
+.admin-inline input:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px var(--c-accent-light);
+}
+
+/* ── Botón principal admin ─────────────────────────────────── */
 .admin-btn {
-  background-color: var(--c-accent);
-  color: white;
+  background: linear-gradient(135deg, var(--c-accent), var(--c-accent-hover));
+  color: #ffffff;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 10px 18px;
-  font-weight: bold;
+  font-weight: 700;
+  font-size: 14px;
   cursor: pointer;
-  transition: 0.2s ease;
-}
-.admin-btn:hover {
-  background-color: var(--c-accent-hover);
+  transition: all 0.18s ease;
+  font-family: inherit;
 }
 
+.admin-btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px var(--c-accent-light);
+}
+
+.admin-btn:active {
+  transform: translateY(0);
+}
+
+/* ── Logo ──────────────────────────────────────────────────── */
 .admin-logo-row {
   display: flex;
   align-items: center;
@@ -93,24 +128,28 @@
 }
 
 .admin-logo-preview {
-  width: 80px;
-  height: 80px;
+  width: 78px;
+  height: 78px;
   object-fit: contain;
   background: var(--c-soft);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 6px;
+  border: 1.5px solid var(--c-border);
 }
 
 .admin-logo-vacio {
-  width: 80px;
-  height: 80px;
+  width: 78px;
+  height: 78px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--c-soft);
-  border-radius: 12px;
+  border-radius: 14px;
+  border: 1.5px dashed var(--c-border);
   color: var(--c-muted);
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
 }
 
 .admin-logo-acciones {
@@ -119,6 +158,13 @@
   gap: 10px;
 }
 
+/* ── Botón de archivo ──────────────────────────────────────── */
+.admin-btn-file {
+  display: inline-block;
+  text-align: center;
+}
+
+/* ── Temas ─────────────────────────────────────────────────── */
 .admin-temas {
   display: flex;
   flex-wrap: wrap;
@@ -129,42 +175,43 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--c-soft);
-  border: 2px solid transparent;
+  background: var(--c-sidebar-btn);
+  border: 2px solid var(--c-border);
   border-radius: 12px;
   padding: 8px 14px;
   font-weight: 600;
-  color: var(--c-title);
+  font-size: 13.5px;
+  color: var(--c-text);
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: all 0.18s ease;
 }
 
 .admin-tema:hover {
-  background: var(--c-label-bg);
+  background: var(--c-sidebar-btn-hover);
+  border-color: var(--c-accent);
 }
 
 .admin-tema.activo {
   border-color: var(--c-accent);
-  background: var(--c-label-bg);
+  background: var(--c-accent-light);
+  color: var(--c-title);
+  font-weight: 700;
 }
 
 .admin-tema-swatch {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
   flex-shrink: 0;
 }
 
-.admin-btn-file {
-  display: inline-block;
-  text-align: center;
+/* ── Empleados ─────────────────────────────────────────────── */
+.admin-empleado-bloque {
+  border-bottom: 1px solid var(--c-border);
+  padding: 12px 0;
 }
 
-.admin-empleado-bloque {
-  border-bottom: 1px solid var(--c-input-border);
-  padding: 10px 0;
-}
 .admin-empleado-bloque:last-child {
   border-bottom: none;
 }
@@ -184,83 +231,112 @@
 .admin-empleado-info {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
+
 .admin-empleado-nombre {
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 14.5px;
   color: var(--c-title);
 }
+
 .admin-empleado-user {
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--c-muted);
 }
 
 .admin-empleado-acciones {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
+/* ── Badges de rol ─────────────────────────────────────────── */
 .admin-rol {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 20px;
-}
-.admin-rol-admin,
-.admin-rol-propietaria {
-  background: #e7d2a8;
-  color: #7a5a1f;
-}
-.admin-rol-empleado {
-  background: #d8d2cb;
-  color: #5a5048;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
 }
 
+.admin-rol-admin,
+.admin-rol-propietaria {
+  background: #fef9c3;
+  color: #713f12;
+  border: 1px solid #fde68a;
+}
+
+.admin-rol-empleado {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+/* ── Botones mini ──────────────────────────────────────────── */
 .admin-btn-mini {
-  background: var(--c-soft);
+  background: var(--c-sidebar-btn);
   color: var(--c-title);
-  border: none;
-  border-radius: 10px;
+  border: 1.5px solid var(--c-border);
+  border-radius: 9px;
   padding: 6px 12px;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12.5px;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: all 0.18s ease;
+  font-family: inherit;
 }
+
 .admin-btn-mini:hover {
-  background: var(--c-label-bg);
+  background: var(--c-sidebar-btn-hover);
+  border-color: var(--c-accent);
 }
 
 .admin-btn-quitar {
-  background: #f0d0d0;
-  color: #a52f23;
-  border: none;
-  border-radius: 10px;
+  background: var(--c-danger-bg, #fef2f2);
+  color: var(--c-danger, #dc2626);
+  border: 1.5px solid var(--c-danger-border, #fca5a5);
+  border-radius: 9px;
   padding: 6px 12px;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12.5px;
   cursor: pointer;
-  transition: 0.2s ease;
-}
-.admin-btn-quitar:hover {
-  background: #e9bcbc;
+  transition: all 0.18s ease;
+  font-family: inherit;
 }
 
+.admin-btn-quitar:hover {
+  background: var(--c-danger, #dc2626);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+/* ── Zona peligro ──────────────────────────────────────────── */
 .admin-peligro {
-  border: 1px solid #e3b3b3;
+  border-color: var(--c-danger-border, #fca5a5) !important;
+  background: var(--c-danger-bg, #fef2f2);
 }
 
 .admin-btn-peligro {
-  background-color: #c0392b;
-  color: white;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: #ffffff;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 10px 18px;
-  font-weight: bold;
+  font-weight: 700;
+  font-size: 14px;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: all 0.18s ease;
+  font-family: inherit;
 }
+
 .admin-btn-peligro:hover {
-  background-color: #a52f23;
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.30);
+}
+
+.admin-btn-peligro:active {
+  transform: translateY(0);
 }
