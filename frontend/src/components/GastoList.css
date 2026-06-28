@@ -5,6 +5,25 @@
   color: var(--c-text);
 }
 
+/* ── Grid responsive ───────────────────────────────────────── */
+.gastos-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 600px) {
+  .gastos-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .gastos-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 /* ── Título sección ────────────────────────────────────────── */
 .gastos-title {
   font-size: 16px;

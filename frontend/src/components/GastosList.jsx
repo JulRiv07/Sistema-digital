@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "./GastoList.css";
 import Modal from "./Modal";
+import { fmtCurrency } from "../services/format";
 
 function GastosList() {
 
@@ -91,19 +92,20 @@ function GastosList() {
             <div>No hay gastos registrados en este mes</div>
         )}
 
+        <div className="gastos-grid">
         {gastos.map(gasto => (
             <div key={gasto.id} className="gasto-card">
 
             <div className="gasto-top">
                 <span>{gasto.descripcion}</span>
-                <span>$ {gasto.monto}</span>
+                <span className="gasto-monto">{fmtCurrency(gasto.monto)}</span>
             </div>
 
             <div className="gasto-fecha">
                 {formatearFecha(gasto.fecha)}
             </div>
 
-            <div style={{ marginTop: "8px" }}>
+            <div className="acciones">
                 <button className="btn-edit" onClick={() => abrirEditar(gasto)}>
                 Editar
                 </button>
@@ -115,6 +117,7 @@ function GastosList() {
 
             </div>
         ))}
+        </div>
 
         <Modal
             isOpen={modalOpen}
