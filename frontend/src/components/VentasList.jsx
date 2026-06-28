@@ -154,6 +154,7 @@ function VentasList() {
             <div>No hay ventas en este mes</div>
         )}
 
+        <div className="ventas-grid">
         {ventas.map(venta => {
             const badge = badgeInfo(venta);
             return (
@@ -208,6 +209,7 @@ function VentasList() {
             </div>
             );
         })}
+        </div>
 
         <Modal
             isOpen={modalOpen}

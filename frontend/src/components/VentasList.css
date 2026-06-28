@@ -5,6 +5,19 @@
   color: var(--c-text);
 }
 
+/* ── Grid de cards ─────────────────────────────────────────── */
+.ventas-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 900px) {
+  .ventas-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 /* ── Título sección ────────────────────────────────────────── */
 .ventas-title {
   font-size: 16px;
@@ -96,6 +109,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   font-size: 12px;
   color: var(--c-muted);
 }
