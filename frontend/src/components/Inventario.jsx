@@ -10,7 +10,6 @@ function Inventario() {
   const [mensaje, setMensaje] = useState("");
 
   const [editId, setEditId] = useState(null);
-  const [codigo, setCodigo] = useState("");
   const [nombre, setNombre] = useState("");
   const [precio, setPrecio] = useState("");
   const [controlaStock, setControlaStock] = useState(false);
@@ -32,7 +31,6 @@ function Inventario() {
 
   const limpiar = () => {
     setEditId(null);
-    setCodigo("");
     setNombre("");
     setPrecio("");
     setControlaStock(false);
@@ -41,12 +39,11 @@ function Inventario() {
 
   const guardar = async (e) => {
     e.preventDefault();
-    if (!codigo || !nombre || precio === "") {
-      aviso("Completa código, nombre y precio");
+    if (!nombre || precio === "") {
+      aviso("Completa nombre y precio");
       return;
     }
     const payload = {
-      codigo,
       nombre,
       precio: Number(precio),
       controla_stock: controlaStock,
@@ -65,7 +62,6 @@ function Inventario() {
 
   const editar = (p) => {
     setEditId(p.id);
-    setCodigo(p.codigo);
     setNombre(p.nombre);
     setPrecio(p.precio);
     setControlaStock(p.controla_stock);
@@ -99,8 +95,9 @@ function Inventario() {
       <section className="inv-card">
         <h3>{editId ? "Editar producto" : "Nuevo producto"}</h3>
         <form className="form-container" onSubmit={guardar}>
-          <label>Código</label>
-          <input value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="Ej: P001" />
+          {!editId && (
+            <p className="inv-vacio">El código del producto se genera automáticamente.</p>
+          )}
 
           <label>Nombre</label>
           <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej: Gelatina" />

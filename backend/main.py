@@ -8,7 +8,7 @@ from fastapi import Cookie, FastAPI, Depends, Query, HTTPException, Request, Res
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import func, extract
+from sqlalchemy import func, extract, or_
 from datetime import datetime
 
 from backend.models import Base, Empresa, Usuario, Cliente, Venta, Pago, Gasto, Producto, VentaItem, RefreshToken
@@ -184,6 +184,34 @@ def generar_codigo_empresa(db: Session) -> str:
         codigo = "".join(secrets.choice(alfabeto) for _ in range(8))
         if not db.query(Empresa).filter(Empresa.codigo == codigo).first():
             return codigo
+
+
+# Alfabeto sin caracteres ambiguos (sin O, 0, I, 1, L) para códigos legibles
+_CODIGO_ALFABETO = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
+
+
+def generar_codigo_producto(db: Session, empresa_id: int) -> str:
+    """Genera un código de producto único tipo SKU, ej: PRD-7F3K9Q."""
+    while True:
+        sufijo = "".join(secrets.choice(_CODIGO_ALFABETO) for _ in range(6))
+        codigo = f"PRD-{sufijo}"
+        existe = db.query(Producto).filter(
+            Producto.empresa_id == empresa_id,
+            func.lower(Producto.codigo) == codigo.lower(),
+        ).first()
+        if not existe:
+            return codigo
+
+
+def producto_dict(p: Producto) -> dict:
+    return {
+        "id": p.id,
+        "codigo": p.codigo,
+        "nombre": p.nombre,
+        "precio": p.precio,
+        "controla_stock": p.controla_stock,
+        "stock": p.stock,
+    }
 
 
 # ===================== AUTENTICACIÓN =====================
@@ -622,6 +650,113 @@ def eliminar_empresa(
     db.query(Empresa).filter(Empresa.id == emp).delete()
     db.commit()
     return {"mensaje": "Empresa eliminada"}
+
+
+# ===================== PRODUCTOS / INVENTARIO =====================
+
+@app.get("/productos")
+def listar_productos(
+    q: str = None,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    query = db.query(Producto).filter(Producto.empresa_id == usuario.empresa_id)
+    if q:
+        patron = f"%{q.strip()}%"
+        query = query.filter(or_(Producto.nombre.ilike(patron), Producto.codigo.ilike(patron)))
+    productos = query.order_by(Producto.nombre).all()
+    return [producto_dict(p) for p in productos]
+
+
+@app.post("/productos")
+def crear_producto(
+    datos: schemas.ProductoCreate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+    if not datos.nombre or not datos.nombre.strip():
+        raise HTTPException(status_code=400, detail="El nombre es obligatorio")
+
+    producto = Producto(
+        empresa_id=usuario.empresa_id,
+        usuario_id=usuario.id,
+        codigo=generar_codigo_producto(db, usuario.empresa_id),
+        nombre=datos.nombre.strip(),
+        precio=datos.precio,
+        controla_stock=bool(datos.controla_stock),
+        stock=datos.stock if datos.controla_stock else None,
+    )
+    db.add(producto)
+    db.commit()
+    db.refresh(producto)
+    return producto_dict(producto)
+
+
+@app.put("/productos/{producto_id}")
+def editar_producto(
+    producto_id: int,
+    datos: schemas.ProductoCreate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+    producto = db.query(Producto).filter(
+        Producto.id == producto_id,
+        Producto.empresa_id == usuario.empresa_id,
+    ).first()
+    if not producto:
+        raise HTTPException(status_code=404, detail="Producto no existe")
+    if not datos.nombre or not datos.nombre.strip():
+        raise HTTPException(status_code=400, detail="El nombre es obligatorio")
+
+    # El código no se cambia (es automático y permanente)
+    producto.nombre = datos.nombre.strip()
+    producto.precio = datos.precio
+    producto.controla_stock = bool(datos.controla_stock)
+    producto.stock = datos.stock if datos.controla_stock else None
+    db.commit()
+    db.refresh(producto)
+    return producto_dict(producto)
+
+
+@app.put("/productos/{producto_id}/stock")
+def actualizar_stock(
+    producto_id: int,
+    datos: schemas.StockUpdate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    producto = db.query(Producto).filter(
+        Producto.id == producto_id,
+        Producto.empresa_id == usuario.empresa_id,
+    ).first()
+    if not producto:
+        raise HTTPException(status_code=404, detail="Producto no existe")
+    if not producto.controla_stock:
+        raise HTTPException(status_code=400, detail="Este producto no maneja stock")
+    producto.stock = datos.stock
+    db.commit()
+    db.refresh(producto)
+    return producto_dict(producto)
+
+
+@app.delete("/productos/{producto_id}")
+def eliminar_producto(
+    producto_id: int,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_actual),
+):
+    requiere_admin(usuario)
+    producto = db.query(Producto).filter(
+        Producto.id == producto_id,
+        Producto.empresa_id == usuario.empresa_id,
+    ).first()
+    if not producto:
+        raise HTTPException(status_code=404, detail="Producto no existe")
+    db.delete(producto)
+    db.commit()
+    return {"mensaje": "Producto eliminado"}
 
 
 # ===================== CLIENTES =====================

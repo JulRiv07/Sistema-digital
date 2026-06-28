@@ -18,7 +18,7 @@ class VentaCreate(BaseModel):
 
 
 class ProductoCreate(BaseModel):
-    codigo: str = Field(..., min_length=1, max_length=50)
+    codigo: str | None = Field(None, max_length=50)  # se genera automáticamente
     nombre: str = Field(..., min_length=1, max_length=200)
     precio: float = Field(..., ge=0, le=100_000_000)
     controla_stock: bool = False
