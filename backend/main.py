@@ -1223,8 +1223,16 @@ def resumen_general(
         func.extract("year", Pago.fecha) == año_sel,
     ).scalar() or 0
 
-    # Pendiente del período: lo vendido menos lo cobrado en ese mes
-    pendiente_mes = ventas_mes - pago_mes
+    # Pendiente = ventas a crédito del mes que aún no tienen pago vinculado
+    pagadas_ids = db.query(Pago.venta_id).filter(Pago.venta_id.isnot(None)).subquery()
+    pendiente_mes = db.query(func.sum(Venta.total)).filter(
+        Venta.empresa_id == emp,
+        Venta.tipo_pago == "credito",
+        func.extract("month", Venta.fecha) == mes_sel,
+        func.extract("year", Venta.fecha) == año_sel,
+        Venta.id.notin_(pagadas_ids),
+    ).scalar() or 0
+
     ganancia_mes = pago_mes - gastos_mes
 
     # El empleado no puede ver gastos ni ganancia
@@ -1386,11 +1394,15 @@ def eliminar_venta(
             if producto and producto.controla_stock and producto.stock is not None:
                 producto.stock += it.cantidad
 
-    # 2) Borrar el detalle PRIMERO y asegurarlo antes de borrar la venta
+    # 2) Borrar el pago vinculado si existe (contado o crédito ya saldado)
+    db.query(Pago).filter(Pago.venta_id == venta.id).delete(synchronize_session=False)
+    db.flush()
+
+    # 3) Borrar el detalle de items
     db.query(VentaItem).filter(VentaItem.venta_id == venta.id).delete(synchronize_session=False)
     db.flush()
 
-    # 3) Ahora sí, borrar la venta
+    # 4) Ahora sí, borrar la venta
     db.delete(venta)
     db.commit()
     return {"mensaje": "Venta eliminada"}
