@@ -10,6 +10,7 @@ function VentasList() {
 
     const [ventas, setVentas] = useState([]);
     const [clientes, setClientes] = useState([]);
+    const [clientesConDeuda, setClientesConDeuda] = useState(new Set());
 
     const [mes, setMes] = useState(hoy.getMonth() + 1);
     const [año, setAño] = useState(hoy.getFullYear());
@@ -35,9 +36,16 @@ function VentasList() {
         .catch(err => console.error(err));
     };
 
+    const cargarDeudas = () => {
+        axios.get("/deudas")
+        .then(res => setClientesConDeuda(new Set(res.data.map(d => d.id))))
+        .catch(err => console.error(err));
+    };
+
     useEffect(() => {
         cargarVentas();
         cargarClientes();
+        cargarDeudas();
     }, [mes, año]);
 
     const formatearFecha = (fechaISO) => {
@@ -47,6 +55,16 @@ function VentasList() {
         month: "long",
         day: "numeric"
         });
+    };
+
+    const badgeInfo = (venta) => {
+        if (venta.tipo_pago === "contado") {
+            return { texto: "Contado ✓", clase: "badge-verde" };
+        }
+        if (clientesConDeuda.has(venta.cliente_id)) {
+            return { texto: "Crédito · Pendiente", clase: "badge-rojo" };
+        }
+        return { texto: "Crédito · Saldado", clase: "badge-verde" };
     };
 
     const abrirEditar = (venta) => {
@@ -67,14 +85,6 @@ function VentasList() {
 
     const actualizarVenta = async () => {
         try {
-            console.log("Datos enviados al backend:");
-            console.log({
-            descripcion,
-            total,
-            tipo_pago: tipoPago,
-            cliente_id: clienteId
-            });
-
             await axios.put(
             `/ventas/${selectedVenta.id}`,
             {
@@ -84,12 +94,9 @@ function VentasList() {
                 cliente_id: Number(clienteId)
             }
             );
-
             cerrarModal();
             cargarVentas();
-
         } catch (error) {
-            console.log("ERROR BACKEND:");
             console.log(error.response?.data);
         }
     };
@@ -147,15 +154,15 @@ function VentasList() {
             <div>No hay ventas en este mes</div>
         )}
 
-        {ventas.map(venta => (
-            <div key={venta.id} className="venta-card">
+        {ventas.map(venta => {
+            const badge = badgeInfo(venta);
+            return (
+            <div key={venta.id} className={`venta-card ${venta.tipo_pago === "credito" && clientesConDeuda.has(venta.cliente_id) ? "venta-card--pendiente" : ""}`}>
 
             <div className="venta-top">
                 <span className="venta-cliente">
                     {venta.cliente_nombre}
                 </span>
-                
-                
 
                 <span className="venta-total">
                 {fmtCurrency(venta.total)}
@@ -178,7 +185,7 @@ function VentasList() {
             )}
 
             <div className="venta-extra">
-                <span>{venta.tipo_pago}</span>
+                <span className={`venta-badge ${badge.clase}`}>{badge.texto}</span>
                 <span>{formatearFecha(venta.fecha)}</span>
             </div>
 
@@ -199,7 +206,8 @@ function VentasList() {
             </div>
 
             </div>
-        ))}
+            );
+        })}
 
         <Modal
             isOpen={modalOpen}

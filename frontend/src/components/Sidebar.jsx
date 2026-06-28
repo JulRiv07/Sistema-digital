@@ -58,7 +58,6 @@ function Sidebar({ activeSection, setActiveSection }) {
       {/* Comunes a los dos roles */}
       <Boton seccion="clientes" icono={cliente}>Clientes</Boton>
       <Boton seccion="verVentas" icono={memo}>Ver ventas</Boton>
-      <Boton seccion="verPagos" icono={money}>Ver pagos</Boton>
 
       {/* Solo empresario / propietaria */}
       {esAdmin && (

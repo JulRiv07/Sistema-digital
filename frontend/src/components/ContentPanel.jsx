@@ -5,7 +5,6 @@ import GastoForm from "./GastoForm";
 import DeudasPanel from "./DeudasPanel";
 import ClientesPanel from "./ClientesPanel";
 import VentasList from "./VentasList";
-import PagosList from "./PagosList";
 import GastosList from "./GastosList";
 import AdminPanel from "./AdminPanel";
 import PerfilPanel from "./PerfilPanel";
@@ -49,9 +48,6 @@ function ContentPanel({
 
       case "verVentas":
         return <VentasList />;
-
-      case "verPagos":
-        return <PagosList />;
 
       case "verGastos":
         return <GastosList />;
