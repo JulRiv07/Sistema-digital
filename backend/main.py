@@ -908,7 +908,6 @@ def saldados_para_cliente(cliente_id: int, empresa_id: int, db: Session) -> set:
         if r[0] is not None
     }
 
-    # Deuda real del cliente (ventas - pagos totales, incluyendo pagos viejos sin venta_id)
     total_ventas = db.query(func.sum(Venta.total)).filter(
         Venta.cliente_id == cliente_id,
         Venta.empresa_id == empresa_id,
@@ -917,9 +916,14 @@ def saldados_para_cliente(cliente_id: int, empresa_id: int, db: Session) -> set:
         Pago.cliente_id == cliente_id,
         Pago.empresa_id == empresa_id,
     ).scalar() or 0
-    deuda_residual = max(0, total_ventas - total_pagos)
 
-    # Las ventas crédito sin pago explícito que cubren los pagos viejos (FIFO: más antiguas primero)
+    # Si pagos > ventas hay pagos huérfanos (ventas eliminadas): el FIFO no es confiable.
+    # En ese caso solo cuentan pagos explícitos con venta_id.
+    if total_pagos > total_ventas:
+        return pagadas_explicitas
+
+    deuda_residual = total_ventas - total_pagos
+
     sin_explicitas = [v for v in todas_credito if v.id not in pagadas_explicitas]
     total_sin_explicitas = sum(v.total for v in sin_explicitas)
     cubierto_por_viejos = max(0, total_sin_explicitas - deuda_residual)
@@ -1260,15 +1264,20 @@ def resumen_general(
         func.extract("year", Pago.fecha) == año_sel,
     ).scalar() or 0
 
-    # Pendiente = ventas a crédito del mes que aún no tienen pago vinculado
-    pagadas_ids = db.query(Pago.venta_id).filter(Pago.venta_id.isnot(None)).subquery()
-    pendiente_mes = db.query(func.sum(Venta.total)).filter(
+    # Pendiente = ventas crédito del mes que NO están saldadas (mismo FIFO que la lista)
+    ventas_credito_mes = db.query(Venta.id, Venta.total, Venta.cliente_id).filter(
         Venta.empresa_id == emp,
         Venta.tipo_pago == "credito",
         func.extract("month", Venta.fecha) == mes_sel,
         func.extract("year", Venta.fecha) == año_sel,
-        Venta.id.notin_(pagadas_ids),
-    ).scalar() or 0
+    ).all()
+
+    clientes_credito = list(set(v.cliente_id for v in ventas_credito_mes))
+    saldados_mes: set = set()
+    for cid in clientes_credito:
+        saldados_mes |= saldados_para_cliente(cid, emp, db)
+
+    pendiente_mes = sum(v.total for v in ventas_credito_mes if v.id not in saldados_mes)
 
     ganancia_mes = pago_mes - gastos_mes
 
