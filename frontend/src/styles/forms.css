@@ -1,3 +1,12 @@
+/* ── Ocultar el ojo nativo del browser en campos password ──── */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+}
+
 /* ── Contenedor ────────────────────────────────────────────── */
 .form-container {
   display: flex;

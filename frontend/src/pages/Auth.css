@@ -198,6 +198,15 @@
   text-decoration: underline;
 }
 
+/* Ocultar el ojo nativo del browser (Edge/Chrome) */
+.auth-card input[type="password"]::-ms-reveal,
+.auth-card input[type="password"]::-ms-clear {
+  display: none;
+}
+.auth-card input[type="password"]::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+}
+
 .password-field {
   position: relative;
   display: flex;
