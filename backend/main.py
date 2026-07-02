@@ -634,6 +634,12 @@ def quitar_empleado(
         .update({Gasto.usuario_id: usuario.id})
     db.query(Cliente).filter(Cliente.empresa_id == emp, Cliente.usuario_id == usuario_id)\
         .update({Cliente.usuario_id: usuario.id})
+    db.query(Producto).filter(Producto.empresa_id == emp, Producto.usuario_id == usuario_id)\
+        .update({Producto.usuario_id: usuario.id})
+
+    # Borrar las sesiones (refresh tokens) del empleado antes de eliminarlo
+    db.query(RefreshToken).filter(RefreshToken.usuario_id == usuario_id)\
+        .delete(synchronize_session=False)
 
     db.delete(miembro)
     db.commit()
@@ -648,13 +654,22 @@ def eliminar_empresa(
     requiere_admin(usuario)
     emp = usuario.empresa_id
 
-    # Borrar en orden seguro por las llaves foráneas
-    db.query(Pago).filter(Pago.empresa_id == emp).delete()
-    db.query(Venta).filter(Venta.empresa_id == emp).delete()
-    db.query(Gasto).filter(Gasto.empresa_id == emp).delete()
-    db.query(Cliente).filter(Cliente.empresa_id == emp).delete()
-    db.query(Usuario).filter(Usuario.empresa_id == emp).delete()
-    db.query(Empresa).filter(Empresa.id == emp).delete()
+    # IDs necesarios para borrar tablas hijas que no tienen empresa_id directo
+    venta_ids = [v.id for v in db.query(Venta.id).filter(Venta.empresa_id == emp).all()]
+    usuario_ids = [u.id for u in db.query(Usuario.id).filter(Usuario.empresa_id == emp).all()]
+
+    # Borrar en orden seguro por las llaves foráneas (hijos antes que padres)
+    if venta_ids:
+        db.query(VentaItem).filter(VentaItem.venta_id.in_(venta_ids)).delete(synchronize_session=False)
+    db.query(Venta).filter(Venta.empresa_id == emp).delete(synchronize_session=False)
+    db.query(Pago).filter(Pago.empresa_id == emp).delete(synchronize_session=False)
+    db.query(Gasto).filter(Gasto.empresa_id == emp).delete(synchronize_session=False)
+    db.query(Producto).filter(Producto.empresa_id == emp).delete(synchronize_session=False)
+    db.query(Cliente).filter(Cliente.empresa_id == emp).delete(synchronize_session=False)
+    if usuario_ids:
+        db.query(RefreshToken).filter(RefreshToken.usuario_id.in_(usuario_ids)).delete(synchronize_session=False)
+    db.query(Usuario).filter(Usuario.empresa_id == emp).delete(synchronize_session=False)
+    db.query(Empresa).filter(Empresa.id == emp).delete(synchronize_session=False)
     db.commit()
     return {"mensaje": "Empresa eliminada"}
 
