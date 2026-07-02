@@ -18,7 +18,7 @@ function DeudasPanel({ setSelectedCliente, setActiveSection }) {
     };
 
     if (deudas.length === 0) {
-        return <h3>No hay clientes con deuda :) </h3>;
+        return <h3 className="estado-vacio">No hay clientes con deuda :)</h3>;
     }
 
     return (

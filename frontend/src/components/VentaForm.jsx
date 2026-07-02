@@ -37,9 +37,22 @@ function VentaForm() {
   };
 
   const cambiarCantidad = (id, cant) => {
+    // Permite dejar el campo vacío mientras se escribe; se normaliza al salir
     setLineas((prev) =>
       prev.map((l) =>
-        l.producto.id === id ? { ...l, cantidad: Math.max(1, Number(cant) || 1) } : l
+        l.producto.id === id
+          ? { ...l, cantidad: cant === "" ? "" : Math.max(1, Number(cant) || 1) }
+          : l
+      )
+    );
+  };
+
+  const normalizarCantidad = (id) => {
+    setLineas((prev) =>
+      prev.map((l) =>
+        l.producto.id === id && (l.cantidad === "" || Number(l.cantidad) < 1)
+          ? { ...l, cantidad: 1 }
+          : l
       )
     );
   };
@@ -47,7 +60,10 @@ function VentaForm() {
   const quitarLinea = (id) =>
     setLineas((prev) => prev.filter((l) => l.producto.id !== id));
 
-  const total = lineas.reduce((s, l) => s + l.producto.precio * l.cantidad, 0);
+  const total = lineas.reduce(
+    (s, l) => s + l.producto.precio * (Number(l.cantidad) || 0),
+    0
+  );
 
   const coincidencias = busqueda.trim()
     ? productos
@@ -76,7 +92,7 @@ function VentaForm() {
         tipo_pago: tipoPago,
         items: lineas.map((l) => ({
           producto_id: l.producto.id,
-          cantidad: l.cantidad,
+          cantidad: Math.max(1, Number(l.cantidad) || 1),
         })),
       });
       aviso("Venta registrada correctamente 🎉", "success");
@@ -145,6 +161,7 @@ function VentaForm() {
                 min="1"
                 value={l.cantidad}
                 onChange={(e) => cambiarCantidad(l.producto.id, e.target.value)}
+                onBlur={() => normalizarCantidad(l.producto.id)}
               />
               <span className="venta-item-sub">
                 {fmtCurrency(l.producto.precio * l.cantidad)}

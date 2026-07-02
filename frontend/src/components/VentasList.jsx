@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Modal from "./Modal";
+import Toast from "./Toast";
 import { fmtCurrency } from "../services/format";
 import "./VentasList.css";
 
@@ -10,6 +11,12 @@ function VentasList() {
 
     const [ventas, setVentas] = useState([]);
     const [clientes, setClientes] = useState([]);
+    const [toast, setToast] = useState(null);
+
+    const aviso = (m, t = "error") => {
+        setToast({ message: m, type: t });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     const [mes, setMes] = useState(hoy.getMonth() + 1);
     const [año, setAño] = useState(hoy.getFullYear());
@@ -102,15 +109,12 @@ function VentasList() {
             cargarVentas();
         } catch (error) {
             console.error("Error al eliminar venta:", error);
-            const status = error.response?.status;
             const detalle = error.response?.data?.detail;
-            if (status) {
-                alert(`No se pudo eliminar. Código ${status}. ${detalle || ""}`);
+            cerrarModal();
+            if (error.response) {
+                aviso(detalle || "No se pudo eliminar la venta");
             } else {
-                alert(
-                    "No hubo respuesta del servidor (puede estar despertando en Render). " +
-                    "Espera ~30 segundos y vuelve a intentar. Detalle: " + (error.message || "desconocido")
-                );
+                aviso("Sin respuesta del servidor. Espera unos segundos y vuelve a intentar.");
             }
         }
     };
@@ -196,7 +200,7 @@ function VentasList() {
         )}
 
         {ventasFiltradas.length === 0 && (
-            <div>No hay ventas en este mes</div>
+            <div className="estado-vacio">No hay ventas en este mes</div>
         )}
 
         <div className="ventas-grid">
@@ -305,6 +309,8 @@ function VentasList() {
             <p>¿Seguro que deseas eliminar esta venta?</p>
             )}
         </Modal>
+
+        {toast && <Toast message={toast.message} type={toast.type} />}
 
         </div>
     );

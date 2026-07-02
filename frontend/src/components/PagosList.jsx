@@ -110,7 +110,7 @@ function PagosList() {
             </div>
 
             {pagosFiltrados.length === 0 && (
-                <div>No hay pagos registrados en este mes</div>
+                <div className="estado-vacio">No hay pagos registrados en este mes</div>
             )}
 
             <div className="pagos-grid">

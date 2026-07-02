@@ -89,7 +89,7 @@ function GastosList() {
         </div>
 
         {gastos.length === 0 && (
-            <div>No hay gastos registrados en este mes</div>
+            <div className="estado-vacio">No hay gastos registrados en este mes</div>
         )}
 
         <div className="gastos-grid">

@@ -1,16 +1,23 @@
 import { useState } from "react";
 import axios from "axios";
+import Toast from "./Toast";
 
 function GastoForm({ onGastoCreado }) {
 
     const [descripcion, setDescripcion] = useState("");
     const [monto, setMonto] = useState("");
+    const [toast, setToast] = useState(null);
+
+    const aviso = (m, t = "error") => {
+        setToast({ message: m, type: t });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!descripcion || !monto) {
-        alert("Completa todos los campos");
+        aviso("Completa todos los campos");
         return;
         }
 
@@ -20,7 +27,7 @@ function GastoForm({ onGastoCreado }) {
             monto: Number(monto)
         });
 
-        alert("Gasto registrado correctamente");
+        aviso("Gasto registrado correctamente 🎉", "success");
 
         setDescripcion("");
         setMonto("");
@@ -31,7 +38,7 @@ function GastoForm({ onGastoCreado }) {
 
         } catch (error) {
         console.error(error);
-        alert("Error al registrar gasto");
+        aviso(error.response?.data?.detail || "Error al registrar gasto");
         }
     };
 
@@ -55,6 +62,8 @@ function GastoForm({ onGastoCreado }) {
         />
 
         <button type="submit">Registrar Gasto</button>
+
+        {toast && <Toast message={toast.message} type={toast.type} />}
 
         </form>
     );

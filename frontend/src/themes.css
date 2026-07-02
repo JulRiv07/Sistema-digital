@@ -219,6 +219,16 @@
   --c-danger-border: #fca5a5;
 }
 
+/* ── Estados vacíos (mensajes "No hay ...") ────────────────── */
+.estado-vacio {
+  color: var(--c-muted);
+  text-align: center;
+  padding: 28px 16px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
 /* ── Animaciones globales ──────────────────────────────────── */
 @keyframes cardFadeIn {
   from { opacity: 0; transform: translateY(8px); }

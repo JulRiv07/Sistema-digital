@@ -21,7 +21,10 @@ function AdminPanel() {
   const [nombreEmpresa, setNombreEmpresa] = useState(usuario?.empresa_nombre || "");
   const [mensaje, setMensaje] = useState("");
   const [modalEliminar, setModalEliminar] = useState(false);
+  const [confirmar, setConfirmar] = useState(null);
   const [copiado, setCopiado] = useState(false);
+
+  const pedirConfirmacion = (texto, accion) => setConfirmar({ texto, accion });
 
   const cargarEmpleados = () => {
     axios
@@ -100,26 +103,40 @@ function AdminPanel() {
     }
   };
 
-  const regenerarCodigo = async () => {
-    if (!window.confirm("¿Generar un código nuevo? El anterior dejará de funcionar.")) return;
-    try {
-      await axios.put("/empresa/codigo/regenerar");
-      await refrescarUsuario();
-      aviso("Código regenerado ✅");
-    } catch (err) {
-      aviso(err.response?.data?.detail || "No se pudo regenerar el código");
-    }
+  const regenerarCodigo = () => {
+    pedirConfirmacion(
+      "¿Generar un código nuevo? El anterior dejará de funcionar.",
+      async () => {
+        try {
+          await axios.put("/empresa/codigo/regenerar");
+          await refrescarUsuario();
+          aviso("Código regenerado ✅");
+        } catch (err) {
+          aviso(err.response?.data?.detail || "No se pudo regenerar el código");
+        }
+      }
+    );
   };
 
-  const quitarEmpleado = async (empleado) => {
-    if (!window.confirm(`¿Quitar a ${empleado.nombre} de la empresa?`)) return;
-    try {
-      await axios.delete(`/empresa/empleados/${empleado.id}`);
-      cargarEmpleados();
-      aviso("Empleado quitado ✅");
-    } catch (err) {
-      aviso(err.response?.data?.detail || "No se pudo quitar al empleado");
-    }
+  const quitarEmpleado = (empleado) => {
+    pedirConfirmacion(
+      `¿Quitar a ${empleado.nombre} de la empresa?`,
+      async () => {
+        try {
+          await axios.delete(`/empresa/empleados/${empleado.id}`);
+          cargarEmpleados();
+          aviso("Empleado quitado ✅");
+        } catch (err) {
+          aviso(err.response?.data?.detail || "No se pudo quitar al empleado");
+        }
+      }
+    );
+  };
+
+  const ejecutarConfirmacion = () => {
+    const accion = confirmar?.accion;
+    setConfirmar(null);
+    if (accion) accion();
   };
 
   const eliminarEmpresa = async () => {
@@ -277,6 +294,15 @@ function AdminPanel() {
           ¿Seguro que deseas eliminar <strong>{usuario?.empresa_nombre}</strong> y todos sus
           datos? Esta acción es permanente.
         </p>
+      </Modal>
+
+      <Modal
+        isOpen={!!confirmar}
+        title="Confirmar"
+        onConfirm={ejecutarConfirmacion}
+        onCancel={() => setConfirmar(null)}
+      >
+        <p>{confirmar?.texto}</p>
       </Modal>
     </div>
   );

@@ -2,12 +2,19 @@ import { useEffect, useState } from "react";
 import "./ClientesList.css";
 import axios from "axios";
 import Modal from "./Modal";
+import Toast from "./Toast";
 
 function ClientesList() {
 
     const [clientes, setClientes] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedCliente, setSelectedCliente] = useState(null);
+    const [toast, setToast] = useState(null);
+
+    const aviso = (m, t = "error") => {
+        setToast({ message: m, type: t });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     const cargarClientes = () => {
         axios.get("/clientes")
@@ -39,7 +46,9 @@ function ClientesList() {
 
             console.error(error);
 
-            alert("No se puede eliminar el cliente porque tiene ventas o pagos");
+            cerrarModal();
+
+            aviso("No se puede eliminar el cliente porque tiene ventas o pagos");
 
         }
 
@@ -51,7 +60,7 @@ function ClientesList() {
     };
 
     if (clientes.length === 0) {
-        return <h4>No hay clientes registrados</h4>;
+        return <h4 className="estado-vacio">No hay clientes registrados</h4>;
     }
 
     return (
@@ -94,6 +103,8 @@ function ClientesList() {
                     ¿Seguro que deseas eliminar a "{selectedCliente?.nombre}"?
                 </p>
             </Modal>
+
+            {toast && <Toast message={toast.message} type={toast.type} />}
 
         </div>
     );
