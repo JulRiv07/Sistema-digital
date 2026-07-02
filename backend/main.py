@@ -661,8 +661,9 @@ def eliminar_empresa(
     # Borrar en orden seguro por las llaves foráneas (hijos antes que padres)
     if venta_ids:
         db.query(VentaItem).filter(VentaItem.venta_id.in_(venta_ids)).delete(synchronize_session=False)
-    db.query(Venta).filter(Venta.empresa_id == emp).delete(synchronize_session=False)
+    # Los pagos referencian ventas (venta_id), así que van ANTES que las ventas
     db.query(Pago).filter(Pago.empresa_id == emp).delete(synchronize_session=False)
+    db.query(Venta).filter(Venta.empresa_id == emp).delete(synchronize_session=False)
     db.query(Gasto).filter(Gasto.empresa_id == emp).delete(synchronize_session=False)
     db.query(Producto).filter(Producto.empresa_id == emp).delete(synchronize_session=False)
     db.query(Cliente).filter(Cliente.empresa_id == emp).delete(synchronize_session=False)
